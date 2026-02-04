@@ -23,7 +23,6 @@
     "pg": "^8.8.0",
     "dotenv": "^16.0.3",
     "uuid": "^9.0.0",
-    "jsonwebtoken": "^9.0.0",
     "qrcode": "^1.5.3",
     "pkpass": "^1.4.0",
     "google-auth-library": "^8.8.0",
