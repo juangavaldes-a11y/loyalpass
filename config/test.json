@@ -1,0 +1,13 @@
+{
+  "db": {
+    "dialect": "sqlite",
+    "storage": ":memory:",
+    "logging": false
+  },
+  "app": {
+    "port": 3000
+  },
+  "logging": {
+    "level": "error"
+  }
+}

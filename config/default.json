@@ -1,0 +1,24 @@
+{
+  "db": {
+    "dialect": "sqlite",
+    "storage": "./dev.sqlite3",
+    "logging": true
+  },
+  "app": {
+    "port": 3000,
+    "nodeEnv": "development"
+  },
+  "apple": {
+    "teamId": null,
+    "keyId": null,
+    "certificatePath": null
+  },
+  "google": {
+    "projectId": null,
+    "serviceAccountKeyPath": null,
+    "issuerId": null
+  },
+  "logging": {
+    "level": "debug"
+  }
+}

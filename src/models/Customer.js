@@ -1,100 +1,44 @@
-const pool = require('../config/db');
-const { v4: uuidv4 } = require('uuid');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+const Business = require('./Business');
 
-class Customer {
-  /**
-   * Create a new customer
-   */
-  static async create(businessId, name, email) {
-    const id = uuidv4();
-    const createdAt = new Date();
-
-    const query = `
-      INSERT INTO customers (id, business_id, name, email, created_at)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING *;
-    `;
-
-    const result = await pool.query(query, [
-      id,
-      businessId,
-      name,
-      email,
-      createdAt,
-    ]);
-
-    return result.rows[0];
+const Customer = sequelize.define(
+  'Customer',
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    business_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Business,
+        key: 'id',
+      },
+    },
+    name: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+  },
+  {
+    timestamps: true,
+    tableName: 'customers',
+    indexes: [
+      {
+        fields: ['business_id', 'email'],
+        unique: true,
+      },
+    ],
   }
+);
 
-  /**
-   * Get customer by ID
-   */
-  static async getById(id) {
-    const query = 'SELECT * FROM customers WHERE id = $1;';
-    const result = await pool.query(query, [id]);
-    return result.rows[0] || null;
-  }
-
-  /**
-   * Get customers by business ID
-   */
-  static async getByBusinessId(businessId) {
-    const query = 'SELECT * FROM customers WHERE business_id = $1;';
-    const result = await pool.query(query, [businessId]);
-    return result.rows;
-  }
-
-  /**
-   * Get customer by email in a business
-   */
-  static async getByEmail(businessId, email) {
-    const query =
-      'SELECT * FROM customers WHERE business_id = $1 AND email = $2;';
-    const result = await pool.query(query, [businessId, email]);
-    return result.rows[0] || null;
-  }
-
-  /**
-   * Update customer
-   */
-  static async update(id, updates) {
-    const fields = [];
-    const values = [];
-    let paramCount = 1;
-
-    for (const [key, value] of Object.entries(updates)) {
-      if (['name', 'email'].includes(key)) {
-        fields.push(`${key} = $${paramCount}`);
-        values.push(value);
-        paramCount++;
-      }
-    }
-
-    if (fields.length === 0) return null;
-
-    fields.push(`updated_at = $${paramCount}`);
-    values.push(new Date());
-    values.push(id);
-
-    const query = `
-      UPDATE customers
-      SET ${fields.join(', ')}
-      WHERE id = $${paramCount + 1}
-      RETURNING *;
-    `;
-
-    const result = await pool.query(query, value);
-    return result.rows[0] || null;
-  }
-
-  /**
-   * Delete customer
-   */
-  static async delete(id) {
-    const query = 'DELETE FROM customers WHERE id = $1 RETURNING *;';
-    const result = await pool.query(query, [id]);
-    return result.rows[0] || null;
-  }
-}
+Customer.belongsTo(Business, { foreignKey: 'business_id' });
 
 module.exports = Customer;

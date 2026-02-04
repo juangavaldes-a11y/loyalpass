@@ -1,0 +1,23 @@
+{
+  "db": {
+    "dialect": "postgres",
+    "host": "db",
+    "port": 5432,
+    "username": "postgres",
+    "password": "postgres",
+    "database": "loyalpass_prod",
+    "logging": false,
+    "pool": {
+      "max": 20,
+      "min": 2,
+      "acquire": 30000,
+      "idle": 10000
+    }
+  },
+  "app": {
+    "port": 3000
+  },
+  "logging": {
+    "level": "warn"
+  }
+}

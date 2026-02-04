@@ -1,0 +1,17 @@
+{
+  "db": {
+    "dialect": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "postgres",
+    "password": "password",
+    "database": "loyalpass_dev",
+    "logging": false
+  },
+  "app": {
+    "port": 3000
+  },
+  "logging": {
+    "level": "info"
+  }
+}
