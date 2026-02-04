@@ -4,9 +4,15 @@
   "description": "Multi-business loyalty platform with Apple Wallet and Google Wallet integration",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "migrate": "node src/database/migrate.js",
+    "start": "NODE_ENV=production node src/server.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo:all",
+    "db:seed": "sequelize-cli db:seed:all",
+    "docker:build": "docker build -t loyalpass:latest .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env loyalpass:latest",
+    "docker:compose": "docker-compose up",
+    "docker:compose:build": "docker-compose up --build",
     "test": "jest"
   },
   "keywords": [
