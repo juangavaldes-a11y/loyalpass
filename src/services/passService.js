@@ -1,7 +1,4 @@
-const Pass = require('../models/Pass');
-const Business = require('../models/Business');
-const Customer = require('../models/Customer');
-const Points = require('../models/Points');
+const { Pass, Business, Customer, Points } = require('../models');
 const ApplePassService = require('./applePassService');
 const GooglePassService = require('./googlePassService');
 const logger = require('../utils/logger');
@@ -13,16 +10,16 @@ class PassService {
   static async createPass(businessId, customerId) {
     try {
       // Verify customer belongs to business
-      const customer = await Customer.getById(customerId);
+      const customer = await Customer.findByPk(customerId);
       if (!customer || customer.business_id !== businessId) {
         throw new Error('Customer not found or does not belong to this business');
       }
 
       // Get business and points
-      const [business, points] = await Promise.all([
-        Business.getById(businessId),
-        Points.getByCustomerId(customerId),
-      ]);
+      const business = await Business.findByPk(businessId);
+      const points = await Points.findOne({
+        where: { customer_id: customerId },
+      });
 
       if (!business) {
         throw new Error('Business not found');
@@ -36,9 +33,9 @@ class PassService {
       let applePassSerial = null;
       try {
         applePassSerial = await ApplePassService.generatePass(
-          business,
-          customer,
-          points
+          business.toJSON(),
+          customer.toJSON(),
+          points.toJSON()
         );
       } catch (error) {
         logger.warn('Apple Pass generation failed:', error);
@@ -51,9 +48,9 @@ class PassService {
         googlePassObjectId = await GooglePassService.generatePass(
           businessId,
           customerId,
-          business,
-          customer,
-          points
+          business.toJSON(),
+          customer.toJSON(),
+          points.toJSON()
         );
       } catch (error) {
         logger.warn('Google Pass generation failed:', error);
@@ -61,17 +58,17 @@ class PassService {
       }
 
       // Create pass record
-      const pass = await Pass.create(
-        businessId,
-        customerId,
-        applePassSerial,
-        googlePassObjectId
-      );
+      const pass = await Pass.create({
+        business_id: businessId,
+        customer_id: customerId,
+        apple_pass_serial: applePassSerial,
+        google_pass_object_id: googlePassObjectId,
+      });
 
       logger.info(`Pass created: ${pass.id}`);
 
       return {
-        pass,
+        pass: pass.toJSON(),
         applePassSerial,
         googlePassObjectId,
       };
@@ -86,7 +83,7 @@ class PassService {
    */
   static async updatePass(passId, customerId, newPoints) {
     try {
-      const pass = await Pass.getById(passId);
+      const pass = await Pass.findByPk(passId);
       if (!pass || pass.customer_id !== customerId) {
         throw new Error('Pass not found');
       }
@@ -117,7 +114,7 @@ class PassService {
 
       logger.info(`Pass updated: ${passId}`);
 
-      return pass;
+      return pass.toJSON();
     } catch (error) {
       logger.error('Error updating pass:', error);
       throw error;
@@ -129,11 +126,13 @@ class PassService {
    */
   static async getPassByCustomerId(customerId) {
     try {
-      const pass = await Pass.getByCustomerId(customerId);
+      const pass = await Pass.findOne({
+        where: { customer_id: customerId },
+      });
       if (!pass) {
         throw new Error('Pass not found for customer');
       }
-      return pass;
+      return pass.toJSON();
     } catch (error) {
       logger.error('Error getting pass:', error);
       throw error;
