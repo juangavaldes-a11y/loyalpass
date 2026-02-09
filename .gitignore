@@ -1,12 +1,45 @@
 node_modules/
 dist/
+build/
 .env
 .env.local
+.env.*.local
 .DS_Store
 *.log
 error.log
 combined.log
+logs/
 certs/
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 coverage/
+.nyc_output/
+.mocha-registry/
+package-lock.json
+yarn.lock
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# IDE files
+.project
+.classpath
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+Thumbs.db
+.Thumbs.db
+
+# Testing
+.coverage
+.env.test
+
+# Sensitive files
+secrets.json
+credentials.json

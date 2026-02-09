@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: loyalpass-app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DB_DIALECT: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: loyalpass
+      DB_PASSWORD: loyalpass_secure_password
+      DB_NAME: loyalpass_db
+      PORT: 3000
+      LOG_LEVEL: info
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - loyalpass-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: loyalpass-db
+    environment:
+      POSTGRES_DB: loyalpass_db
+      POSTGRES_USER: loyalpass
+      POSTGRES_PASSWORD: loyalpass_secure_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - loyalpass-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loyalpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  loyalpass-network:
+    driver: bridge
