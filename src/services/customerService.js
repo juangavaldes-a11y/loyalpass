@@ -26,6 +26,10 @@ class CustomerService {
       });
 
       const { customer: createdCustomer } = await createCustomerWithPoints(customer);
+      logger.info('Customer creation completed', {
+        businessId,
+        customerId: createdCustomer?.id,
+      });
       return createdCustomer.toJSON();
     } catch (error) {
       logger.error('Error creating customer:', error);
@@ -43,6 +47,7 @@ class CustomerService {
         include: [{ model: Points, as: 'points' }],
       });
       if (!customer) {
+        logger.warn('Customer lookup failed', { businessId, customerId });
         throw new Error('Customer not found');
       }
 
@@ -60,10 +65,12 @@ class CustomerService {
    */
   static async getCustomersByBusiness(businessId) {
     try {
-      return await Customer.findAll({
+      const customers = await Customer.findAll({
         where: { business_id: businessId },
         include: [{ model: Points, as: 'points' }],
       });
+      logger.info('Customer list loaded', { businessId, count: customers?.length || 0 });
+      return customers;
     } catch (error) {
       logger.error('Error getting customers:', error);
       throw error;
@@ -79,6 +86,7 @@ class CustomerService {
         where: { id: customerId, business_id: businessId },
       });
       if (!customer) {
+        logger.warn('Customer update target not found', { businessId, customerId });
         throw new Error('Customer not found');
       }
 

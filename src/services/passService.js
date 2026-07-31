@@ -59,7 +59,13 @@ class PassService {
         metadata: { customerId, applePassSerial, googlePassObjectId },
       });
 
-      logger.info(`Pass created: ${pass.id}`);
+      logger.info('Pass created successfully', {
+        businessId,
+        customerId,
+        passId: pass.id,
+        applePassSerial,
+        googlePassObjectId,
+      });
 
       return {
         pass: pass.toJSON(),
@@ -67,7 +73,7 @@ class PassService {
         googlePassObjectId,
       };
     } catch (error) {
-      logger.error('Error creating pass:', error);
+      logger.error('Error creating pass', error, { businessId, customerId });
       throw error;
     }
   }
@@ -112,7 +118,12 @@ class PassService {
         }
       }
 
-      logger.info(`Pass updated: ${passId}`);
+      logger.info('Pass updated successfully', {
+        businessId,
+        customerId,
+        passId,
+        newPoints,
+      });
 
       await AuditService.log({
         businessId,
@@ -126,7 +137,7 @@ class PassService {
 
       return pass.toJSON();
     } catch (error) {
-      logger.error('Error updating pass:', error);
+      logger.error('Error updating pass', error, { businessId, passId, customerId, newPoints });
       throw error;
     }
   }

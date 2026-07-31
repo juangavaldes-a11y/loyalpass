@@ -1,45 +1,78 @@
 require('dotenv').config();
 const config = require('config');
 
+function getEnvOrDefault(key, fallback) {
+  const value = process.env[key];
+  if (typeof value === 'string' && value.trim() !== '') {
+    return value;
+  }
+  return fallback;
+}
+
+function getSecretValue(key, fallback) {
+  const value = getEnvOrDefault(key, fallback);
+  if (typeof value === 'string' && value.trim() !== '') {
+    return value;
+  }
+  return fallback;
+}
+
+function getConfigValue(section, key, fallback) {
+  if (config.has(section)) {
+    const sectionConfig = config.get(section);
+    if (sectionConfig && Object.prototype.hasOwnProperty.call(sectionConfig, key)) {
+      return sectionConfig[key];
+    }
+  }
+  return fallback;
+}
+
 // Merge environment variables with config file settings
 const nodeEnv = process.env.NODE_ENV || 'development';
-const baseDbConfig = config.get('db');
-const baseAppConfig = config.get('app');
+const baseDbConfig = config.has('db') ? config.get('db') : {};
+const baseAppConfig = config.has('app') ? config.get('app') : {};
 const baseAppleConfig = config.has('apple') ? config.get('apple') : {};
 const baseGoogleConfig = config.has('google') ? config.get('google') : {};
-const baseLoggingConfig = config.get('logging');
+const baseLoggingConfig = config.has('logging') ? config.get('logging') : {};
 
 const mergedConfig = {
   // Allow environment variables to override config file
   db: {
     ...baseDbConfig,
-    host: process.env.DB_HOST || baseDbConfig.host,
-    port: process.env.DB_PORT || baseDbConfig.port,
-    database: process.env.DB_NAME || baseDbConfig.database,
-    username: process.env.DB_USER || baseDbConfig.username,
-    password: process.env.DB_PASSWORD || baseDbConfig.password,
-    dialect: process.env.DB_DIALECT || baseDbConfig.dialect,
+    host: getEnvOrDefault('DB_HOST', getConfigValue('db', 'host', 'localhost')),
+    port: getEnvOrDefault('DB_PORT', getConfigValue('db', 'port', 5432)),
+    database: getEnvOrDefault('DB_NAME', getConfigValue('db', 'database', 'loyalpass')),
+    username: getEnvOrDefault('DB_USER', getConfigValue('db', 'username', 'postgres')),
+    password: getSecretValue('DB_PASSWORD', getConfigValue('db', 'password', 'postgres')),
+    dialect: getEnvOrDefault('DB_DIALECT', getConfigValue('db', 'dialect', 'postgres')),
+    logging: getEnvOrDefault('DB_LOGGING', getConfigValue('db', 'logging', false)),
   },
   app: {
     ...baseAppConfig,
-    port: process.env.PORT || baseAppConfig.port,
+    port: getEnvOrDefault('PORT', getConfigValue('app', 'port', 3000)),
     nodeEnv,
   },
   apple: {
     ...baseAppleConfig,
-    teamId: process.env.APPLE_TEAM_ID || baseAppleConfig.teamId,
-    keyId: process.env.APPLE_KEY_ID || baseAppleConfig.keyId,
-    certificatePath: process.env.APPLE_CERTIFICATE_PATH || baseAppleConfig.certificatePath,
+    teamId: getSecretValue('APPLE_TEAM_ID', getConfigValue('apple', 'teamId', '')),
+    keyId: getSecretValue('APPLE_KEY_ID', getConfigValue('apple', 'keyId', '')),
+    certificatePath: getSecretValue('APPLE_CERTIFICATE_PATH', getConfigValue('apple', 'certificatePath', '')),
   },
   google: {
     ...baseGoogleConfig,
-    projectId: process.env.GOOGLE_PROJECT_ID || baseGoogleConfig.projectId,
-    serviceAccountKeyPath: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || baseGoogleConfig.serviceAccountKeyPath,
-    issuerId: process.env.GOOGLE_ISSUER_ID || baseGoogleConfig.issuerId,
+    projectId: getSecretValue('GOOGLE_PROJECT_ID', getConfigValue('google', 'projectId', '')),
+    serviceAccountKeyPath: getSecretValue('GOOGLE_SERVICE_ACCOUNT_PATH', getConfigValue('google', 'serviceAccountKeyPath', '')),
+    issuerId: getSecretValue('GOOGLE_ISSUER_ID', getConfigValue('google', 'issuerId', '')),
   },
   logging: {
     ...baseLoggingConfig,
-    level: process.env.LOG_LEVEL || baseLoggingConfig.level,
+    level: getEnvOrDefault('LOG_LEVEL', getConfigValue('logging', 'level', 'info')),
+  },
+  secrets: {
+    authSessionSecret: getSecretValue('AUTH_SESSION_SECRET', getConfigValue('secrets', 'authSessionSecret', '')),
+    platformAdminEmail: getEnvOrDefault('PLATFORM_ADMIN_EMAIL', getConfigValue('secrets', 'platformAdminEmail', 'admin@loyalpass.local')),
+    platformAdminPassword: getSecretValue('PLATFORM_ADMIN_PASSWORD', getConfigValue('secrets', 'platformAdminPassword', 'admin123')),
+    webhookSecret: getSecretValue('WEBHOOK_SECRET', getConfigValue('secrets', 'webhookSecret', '')),
   },
 };
 

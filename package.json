@@ -5,6 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "NODE_ENV=production node src/server.js",
+    "lint": "node -e \"console.log('No lint config configured')\"",
     "dev": "NODE_ENV=development nodemon src/server.js",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo:all",

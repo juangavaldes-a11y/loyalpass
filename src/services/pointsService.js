@@ -1,5 +1,6 @@
 const { Points, Customer } = require('../models');
 const AuditService = require('./auditService');
+const WebhookService = require('./webhookService');
 const logger = require('../utils/logger');
 
 async function getScopedPoints(businessId, customerId) {
@@ -13,6 +14,29 @@ async function getScopedPoints(businessId, customerId) {
       },
     ],
   });
+}
+
+async function notifyWebhook(event, businessId, customerId, payload = {}) {
+  const webhookUrl = process.env.WEBHOOK_URL;
+  if (!webhookUrl) {
+    return;
+  }
+
+  try {
+    await WebhookService.deliver({
+      url: webhookUrl,
+      secret: process.env.WEBHOOK_SECRET,
+      event,
+      payload: {
+        event,
+        businessId,
+        customerId,
+        ...payload,
+      },
+    });
+  } catch (error) {
+    logger.warn('Webhook notification skipped', { error: error.message, event, businessId, customerId });
+  }
 }
 
 class PointsService {
@@ -56,13 +80,17 @@ class PointsService {
         entityId: customerId,
         metadata: { amount },
       });
-      logger.info(
-        `Points added: ${amount} to customer ${customerId}, new balance: ${points.balance + amount}`
-      );
+      await notifyWebhook('points.added', businessId, customerId, { amount, balance: points.balance + amount });
+      logger.info('Points added successfully', {
+        businessId,
+        customerId,
+        amount,
+        newBalance: points.balance + amount,
+      });
 
       return points.toJSON();
     } catch (error) {
-      logger.error('Error adding points:', error);
+      logger.error('Error adding points', error, { businessId, customerId, amount });
       throw error;
     }
   }
@@ -97,13 +125,17 @@ class PointsService {
         entityId: customerId,
         metadata: { amount },
       });
-      logger.info(
-        `Points redeemed: ${amount} from customer ${customerId}, new balance: ${points.balance - amount}`
-      );
+      await notifyWebhook('points.redeemed', businessId, customerId, { amount, balance: points.balance - amount });
+      logger.info('Points redeemed successfully', {
+        businessId,
+        customerId,
+        amount,
+        newBalance: points.balance - amount,
+      });
 
       return points.toJSON();
     } catch (error) {
-      logger.error('Error redeeming points:', error);
+      logger.error('Error redeeming points', error, { businessId, customerId, amount });
       throw error;
     }
   }
@@ -132,11 +164,16 @@ class PointsService {
         entityId: customerId,
         metadata: { balance },
       });
-      logger.info(`Points balance set for customer ${customerId}: ${balance}`);
+      await notifyWebhook('points.balance.set', businessId, customerId, { balance });
+      logger.info('Points balance set successfully', {
+        businessId,
+        customerId,
+        balance,
+      });
 
       return points.toJSON();
     } catch (error) {
-      logger.error('Error setting points balance:', error);
+      logger.error('Error setting points balance', error, { businessId, customerId, balance });
       throw error;
     }
   }

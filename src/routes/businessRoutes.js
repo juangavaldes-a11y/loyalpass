@@ -25,5 +25,8 @@ router.get('/:id/quota-status', BusinessController.getQuotaStatus);
 router.get('/:id/api-keys', BusinessController.getApiKeys);
 router.post('/:id/api-keys', writeLimiter, BusinessController.createApiKey);
 router.post('/:id/api-keys/rotate', writeLimiter, BusinessController.rotateApiKey);
+router.get('/:id/export', BusinessController.exportBusinessData);
+router.delete('/:id/export', writeLimiter, BusinessController.deleteBusinessData);
+router.get('/:id/support', BusinessController.getSupportPolicy);
 
 module.exports = router;

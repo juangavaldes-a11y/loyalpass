@@ -1,4 +1,7 @@
 const BusinessService = require('../services/businessService');
+const ExportService = require('../services/exportService');
+const SupportService = require('../services/supportService');
+const logger = require('../utils/logger');
 const { assertPlatformAdmin, assertBusinessAccess } = require('../utils/tenantAccess');
 const { sendSuccess, sendError } = require('../utils/httpResponses');
 
@@ -30,8 +33,17 @@ class BusinessController {
         text_color
       );
 
+      logger.info('Business created via controller', {
+        businessId: result?.business?.id,
+        path: req.path,
+        method: req.method,
+      });
       return sendSuccess(res, 201, { data: result });
     } catch (error) {
+      logger.error('Business controller create flow failed', error, {
+        path: req.path,
+        method: req.method,
+      });
       next(error);
     }
   }
@@ -106,8 +118,18 @@ class BusinessController {
 
       const business = await BusinessService.updateBusiness(id, req.body);
 
+      logger.info('Business updated via controller', {
+        businessId: id,
+        path: req.path,
+        method: req.method,
+      });
       return sendSuccess(res, 200, { data: business });
     } catch (error) {
+      logger.error('Business controller update flow failed', error, {
+        businessId: id,
+        path: req.path,
+        method: req.method,
+      });
       next(error);
     }
   }
@@ -258,6 +280,102 @@ class BusinessController {
         message: 'Old API keys have been deactivated',
       });
     } catch (error) {
+      next(error);
+    }
+  }
+
+  static async exportBusinessData(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { format = 'json' } = req.query;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      const payload = await ExportService.exportBusinessData(id, format);
+      logger.info('Business export requested', {
+        businessId: id,
+        format,
+        path: req.path,
+        method: req.method,
+      });
+      if (format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        return res.status(200).send(payload);
+      }
+
+      return sendSuccess(res, 200, { data: payload });
+    } catch (error) {
+      logger.error('Business export flow failed', error, {
+        businessId: req.params.id,
+        path: req.path,
+        method: req.method,
+      });
+      if (error.message === 'Business not found') {
+        return sendError(res, 404, error.message);
+      }
+      next(error);
+    }
+  }
+
+  static async deleteBusinessData(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      const result = await ExportService.deleteBusinessData(id);
+      logger.warn('Business data deletion requested', {
+        businessId: id,
+        path: req.path,
+        method: req.method,
+      });
+      return sendSuccess(res, 200, { data: result, message: 'Data deletion workflow completed' });
+    } catch (error) {
+      logger.error('Business deletion flow failed', error, {
+        businessId: req.params.id,
+        path: req.path,
+        method: req.method,
+      });
+      if (error.message === 'Business not found') {
+        return sendError(res, 404, error.message);
+      }
+      next(error);
+    }
+  }
+
+  static async getSupportPolicy(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return res.status(403).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      const support = await SupportService.getSupportPolicy(id);
+      return sendSuccess(res, 200, { data: { support } });
+    } catch (error) {
+      if (error.message === 'Business not found') {
+        return sendError(res, 404, error.message);
+      }
       next(error);
     }
   }

@@ -57,6 +57,11 @@ const Business = sequelize.define(
       allowNull: true,
       defaultValue: {},
     },
+    pricing_tier: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: 'starter',
+    },
   },
   {
     timestamps: true,

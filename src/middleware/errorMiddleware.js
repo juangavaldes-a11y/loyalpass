@@ -1,14 +1,24 @@
 const logger = require('../utils/logger');
 
+const buildRequestContext = (req) => ({
+  method: req.method,
+  path: req.path,
+  requestId: req.headers['x-request-id'] || req.id,
+  businessId: req.businessId || req.user?.businessId || null,
+  userId: req.user?.sub || null,
+  isPlatformAdmin: Boolean(req.isPlatformAdmin),
+});
+
 /**
  * Error handling middleware
  */
 const errorHandler = (err, req, res, next) => {
-  logger.error('Error:', {
+  const requestContext = buildRequestContext(req);
+  logger.error('Unhandled application error', {
     message: err.message,
+    name: err.name,
     stack: err.stack,
-    path: req.path,
-    method: req.method,
+    ...requestContext,
   });
 
   // Default error
@@ -36,6 +46,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message,
+    requestId: requestContext.requestId,
     ...(process.env.NODE_ENV === 'development' && { error: err.stack }),
   });
 };
@@ -44,6 +55,13 @@ const errorHandler = (err, req, res, next) => {
  * 404 handler
  */
 const notFoundHandler = (req, res) => {
+  logger.warn('Route not found', {
+    method: req.method,
+    path: req.path,
+    requestId: req.headers['x-request-id'] || req.id,
+    businessId: req.businessId || req.user?.businessId || null,
+  });
+
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.path}`,

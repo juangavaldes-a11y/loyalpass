@@ -5,6 +5,24 @@ const { mapBusinessUpdates } = require('../utils/fieldMapping');
 const { createBusinessOwnerContext, rotateBusinessApiKey } = require('./businessLifecycleService');
 const { getPlanLimits, evaluateQuotaUsage } = require('../utils/planLimits');
 
+const PRICING_TIERS = {
+  starter: {
+    name: 'Starter',
+    monthlyPrice: 29,
+    features: ['Up to 100 customers', '1 wallet pass type', 'Email support'],
+  },
+  growth: {
+    name: 'Growth',
+    monthlyPrice: 99,
+    features: ['Up to 1000 customers', 'Advanced analytics', 'Priority support'],
+  },
+  enterprise: {
+    name: 'Enterprise',
+    monthlyPrice: 299,
+    features: ['Unlimited customers', 'Custom integrations', 'Dedicated success manager'],
+  },
+};
+
 class BusinessService {
   /**
    * Create new business
@@ -164,6 +182,7 @@ class BusinessService {
       return {
         businessId,
         plan,
+        pricing: PRICING_TIERS[plan] || PRICING_TIERS.starter,
         quotas,
         usage,
         checks: Object.keys(quotas).reduce((acc, metric) => {
