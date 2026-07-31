@@ -83,6 +83,37 @@ class BusinessService {
   }
 
   /**
+   * Update business onboarding state and plan
+   */
+  static async updateOnboarding(businessId, payload = {}) {
+    try {
+      const business = await Business.findByPk(businessId);
+      if (!business) {
+        throw new Error('Business not found');
+      }
+
+      const mappedUpdates = mapBusinessUpdates(payload);
+      await business.update(mappedUpdates);
+
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'business.onboarding.update',
+        entityType: 'business',
+        entityId: businessId,
+        metadata: mappedUpdates,
+      });
+
+      logger.info(`Business onboarding updated: ${businessId}`);
+      return business.toJSON();
+    } catch (error) {
+      logger.error('Error updating onboarding:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Get all API keys for business
    */
   static async getApiKeys(businessId) {
