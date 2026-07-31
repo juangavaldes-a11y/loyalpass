@@ -60,6 +60,12 @@ export default function AdminClientsDashboard() {
   const completedOnboarding = businessList.filter((business) => business.onboarding_status === 'completed').length;
   const needsAttention = businessList.filter((business) => business.onboarding_status !== 'completed').length;
   const nextPriority = completedOnboarding === clientCount && clientCount > 0 ? 'Everything is moving smoothly.' : 'Review the next client onboarding step.';
+  const adminLaunchNarrative = clientCount > 0
+    ? 'You have active clients in the system. Focus on moving the next cohort through launch readiness and billing review.'
+    : 'There are no client records yet. Create the first client and use the guided playbook to move them into launch.';
+  const adminGuidedAction = completedOnboarding > 0
+    ? 'Use the active client list to review the few clients still in progress and keep launch momentum steady.'
+    : 'Start with a new client profile, then use the checklist to drive the plan, billing, and onboarding steps.';
   const adminOnboardingSteps = [
     {
       key: 'create',
@@ -183,6 +189,12 @@ export default function AdminClientsDashboard() {
           <div className={styles.sectionHeadline}>
             <h2>Onboard Client</h2>
             <span className={styles.pill}>Launch flow</span>
+          </div>
+          <div className={styles.guidedPanel}>
+            <h3>What to do next</h3>
+            <p>{nextPriority}</p>
+            <p>{adminLaunchNarrative}</p>
+            <p>{adminGuidedAction}</p>
           </div>
           <form onSubmit={handleCreate} className={styles.form}>
             <input

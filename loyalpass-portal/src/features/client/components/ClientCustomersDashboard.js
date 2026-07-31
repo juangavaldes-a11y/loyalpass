@@ -73,6 +73,12 @@ export default function ClientCustomersDashboard() {
   const nextBestAction = onboardingSteps.find((step) => !step.completed)?.label || 'You are fully set up.';
   const customerCount = customers.length;
   const passReady = Boolean(passQuery.data?.data?.id);
+  const launchNarrative = customerCount > 0
+    ? 'Your loyalty program has a live member base. Focus on rewarding activity and making the first wallet pass feel seamless.'
+    : 'You are still in the early stage. Add your first customer and turn the workspace into an active loyalty loop.';
+  const guidedAction = passReady
+    ? 'You already have a pass ready. Use it to show members how their benefits travel with them.'
+    : 'Create the first pass so customers can keep their membership experience mobile and visible.';
 
   function handleCreate(event) {
     event.preventDefault();
@@ -163,6 +169,12 @@ export default function ClientCustomersDashboard() {
           <div className={styles.sectionHeadline}>
             <h2>Onboarding Guide</h2>
             <span className={styles.pill}>{onboardingStatusLabel}</span>
+          </div>
+          <div className={styles.guidedPanel}>
+            <h3>What to do next</h3>
+            <p>{nextBestAction}</p>
+            <p>{launchNarrative}</p>
+            <p>{guidedAction}</p>
           </div>
           <div className={styles.notice}>
             <p><strong>Status:</strong> {onboardingStatusLabel}</p>
