@@ -1,8 +1,8 @@
-const crypto = require('crypto');
 const { Business, ApiKey } = require('../models');
-const AuthService = require('./authService');
 const AuditService = require('./auditService');
 const logger = require('../utils/logger');
+const { mapBusinessUpdates } = require('../utils/fieldMapping');
+const { createBusinessOwnerContext, rotateBusinessApiKey } = require('./businessLifecycleService');
 
 class BusinessService {
   /**
@@ -18,29 +18,11 @@ class BusinessService {
         text_color: textColor,
       });
 
-      // Create API key for business
-      const apiKey = await ApiKey.create({
-        business_id: business.id,
-      });
-
-      const ownerPassword = crypto.randomBytes(8).toString('hex');
-      const ownerUser = await AuthService.createBusinessOwnerUser(business, ownerPassword, apiKey.key);
-
-      await AuditService.log({
-        businessId: business.id,
-        actorType: 'system',
-        actorId: 'system',
-        action: 'business.create',
-        entityType: 'business',
-        entityId: business.id,
-        metadata: { name: business.name, ownerEmail: ownerUser.email },
-      });
-
-      logger.info(`Business created: ${business.id}`);
+      const { apiKey, ownerPassword, ownerUser } = await createBusinessOwnerContext(business);
 
       return {
         business: business.toJSON(),
-        apiKey: apiKey.key, // Only return the key once
+        apiKey: apiKey.key,
         owner: {
           email: ownerUser.email,
           password: ownerPassword,
@@ -78,12 +60,7 @@ class BusinessService {
         throw new Error('Business not found');
       }
 
-      // Map incoming field names to model fields
-      const mappedUpdates = {};
-      if (updates.name) mappedUpdates.name = updates.name;
-      if (updates.logoUrl) mappedUpdates.logo_url = updates.logoUrl;
-      if (updates.brandColor) mappedUpdates.brand_color = updates.brandColor;
-      if (updates.textColor) mappedUpdates.text_color = updates.textColor;
+      const mappedUpdates = mapBusinessUpdates(updates);
 
       await business.update(mappedUpdates);
       await AuditService.log({
@@ -139,26 +116,7 @@ class BusinessService {
    */
   static async rotateApiKey(businessId) {
     try {
-      // Deactivate all existing keys
-      await ApiKey.update(
-        { active: false },
-        { where: { business_id: businessId } }
-      );
-
-      // Create new key
-      const newKey = await ApiKey.create({
-        business_id: businessId,
-      });
-      await AuditService.log({
-        businessId,
-        actorType: 'user',
-        actorId: businessId,
-        action: 'api_key.rotate',
-        entityType: 'api_key',
-        entityId: businessId,
-      });
-      logger.info(`API key rotated for business: ${businessId}`);
-      return newKey.key;
+      return rotateBusinessApiKey(businessId);
     } catch (error) {
       logger.error('Error rotating API key:', error);
       throw error;

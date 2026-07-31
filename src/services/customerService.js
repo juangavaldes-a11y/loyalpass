@@ -1,6 +1,8 @@
 const { Customer, Points } = require('../models');
 const AuditService = require('./auditService');
 const logger = require('../utils/logger');
+const { mapCustomerUpdates } = require('../utils/fieldMapping');
+const { createCustomerWithPoints } = require('./customerLifecycleService');
 
 class CustomerService {
   /**
@@ -23,24 +25,8 @@ class CustomerService {
         email,
       });
 
-      // Create points record
-      await Points.create({
-        customer_id: customer.id,
-        balance: 0,
-      });
-
-      await AuditService.log({
-        businessId,
-        actorType: 'user',
-        actorId: businessId,
-        action: 'customer.create',
-        entityType: 'customer',
-        entityId: customer.id,
-        metadata: { email, name },
-      });
-
-      logger.info(`Customer created: ${customer.id}`);
-      return customer.toJSON();
+      const { customer: createdCustomer } = await createCustomerWithPoints(customer);
+      return createdCustomer.toJSON();
     } catch (error) {
       logger.error('Error creating customer:', error);
       throw error;
@@ -96,10 +82,7 @@ class CustomerService {
         throw new Error('Customer not found');
       }
 
-      // Map incoming field names to model fields
-      const mappedUpdates = {};
-      if (updates.name) mappedUpdates.name = updates.name;
-      if (updates.email) mappedUpdates.email = updates.email;
+      const mappedUpdates = mapCustomerUpdates(updates);
 
       await customer.update(mappedUpdates);
       await AuditService.log({

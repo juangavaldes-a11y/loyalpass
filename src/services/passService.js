@@ -1,8 +1,9 @@
-const { Pass, Business, Customer, Points } = require('../models');
+const { Pass } = require('../models');
 const ApplePassService = require('./applePassService');
 const GooglePassService = require('./googlePassService');
 const AuditService = require('./auditService');
 const logger = require('../utils/logger');
+const { getPassContext } = require('../utils/passContext');
 
 class PassService {
   /**
@@ -10,25 +11,7 @@ class PassService {
    */
   static async createPass(businessId, customerId) {
     try {
-      // Verify customer belongs to business
-      const customer = await Customer.findByPk(customerId);
-      if (!customer || customer.business_id !== businessId) {
-        throw new Error('Customer not found or does not belong to this business');
-      }
-
-      // Get business and points
-      const business = await Business.findByPk(businessId);
-      const points = await Points.findOne({
-        where: { customer_id: customerId },
-      });
-
-      if (!business) {
-        throw new Error('Business not found');
-      }
-
-      if (!points) {
-        throw new Error('Points record not found for customer');
-      }
+      const { customer, business, points } = await getPassContext(businessId, customerId);
 
       // Generate Apple Pass
       let applePassSerial = null;
