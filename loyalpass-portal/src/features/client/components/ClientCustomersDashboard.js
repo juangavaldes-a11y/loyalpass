@@ -7,6 +7,7 @@ import { useQuotaStatus } from '@/features/admin/hooks/useClients';
 import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
+import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -79,6 +80,32 @@ export default function ClientCustomersDashboard() {
   const guidedAction = passReady
     ? 'You already have a pass ready. Use it to show members how their benefits travel with them.'
     : 'Create the first pass so customers can keep their membership experience mobile and visible.';
+  const clientMilestones = [
+    {
+      key: 'profile',
+      label: 'Profile foundation',
+      description: 'Complete the business profile and define the campaign style.',
+      status: businessProfile?.name ? 'completed' : 'current',
+    },
+    {
+      key: 'members',
+      label: 'Member onboarding',
+      description: 'Capture the first loyalty customers and build a vibrant member list.',
+      status: customerCount > 0 ? 'completed' : 'current',
+    },
+    {
+      key: 'reward',
+      label: 'Points loop',
+      description: 'Issue rewards so customers can see value in the program immediately.',
+      status: 'upcoming',
+    },
+    {
+      key: 'wallet',
+      label: 'Wallet launch',
+      description: 'Ship the first mobile pass and connect the experience across devices.',
+      status: passReady ? 'completed' : 'upcoming',
+    },
+  ];
 
   function handleCreate(event) {
     event.preventDefault();
@@ -190,6 +217,11 @@ export default function ClientCustomersDashboard() {
             subtitle="A practical journey from profile setup to wallet-ready customer engagement."
             steps={onboardingSteps}
             accentLabel="Client flow"
+          />
+          <MilestoneTimeline
+            title="Milestone timeline"
+            subtitle="A compact view of the rollout phases that matter most for the first launch."
+            milestones={clientMilestones}
           />
         </article>
 

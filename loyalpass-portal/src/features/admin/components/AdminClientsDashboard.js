@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClientLookup, useCreateClient, useUpdateClient, useUpdateBilling, useUpdateOnboarding, useQuotaStatus } from '@/features/admin/hooks/useClients';
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
+import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
 import styles from '@/app/portal.module.css';
 
 function statusFromMutation(mutation) {
@@ -66,6 +67,26 @@ export default function AdminClientsDashboard() {
   const adminGuidedAction = completedOnboarding > 0
     ? 'Use the active client list to review the few clients still in progress and keep launch momentum steady.'
     : 'Start with a new client profile, then use the checklist to drive the plan, billing, and onboarding steps.';
+  const adminMilestones = [
+    {
+      key: 'prospect',
+      label: 'Client discovery',
+      description: 'Create the business account and confirm the launch owner.',
+      status: clientCount > 0 ? 'completed' : 'current',
+    },
+    {
+      key: 'setup',
+      label: 'Setup and plan',
+      description: 'Align plan tier, billing state, and onboarding milestones.',
+      status: businessList.some((business) => business.plan || business.subscription_status) ? 'completed' : 'current',
+    },
+    {
+      key: 'launch',
+      label: 'Launch readiness',
+      description: 'Move the client into a completed onboarding state and keep the rollout healthy.',
+      status: completedOnboarding > 0 ? 'completed' : 'upcoming',
+    },
+  ];
   const adminOnboardingSteps = [
     {
       key: 'create',
@@ -382,6 +403,11 @@ export default function AdminClientsDashboard() {
             subtitle="Keep every new client moving from setup to launch with a consistent operational checklist."
             steps={adminOnboardingSteps}
             accentLabel="Ops view"
+          />
+          <MilestoneTimeline
+            title="Operational milestones"
+            subtitle="A simple execution map for the client launch sequence."
+            milestones={adminMilestones}
           />
         </div>
       </section>
