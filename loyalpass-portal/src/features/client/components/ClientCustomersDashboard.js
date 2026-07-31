@@ -36,6 +36,33 @@ export default function ClientCustomersDashboard() {
   const customers = customersQuery.data?.data || [];
   const businessProfile = businessProfileQuery.data?.data || null;
 
+  const onboardingSteps = [
+    {
+      key: 'profile',
+      label: 'Complete your business profile',
+      completed: Boolean(businessProfile?.name),
+    },
+    {
+      key: 'customers',
+      label: 'Add your first loyalty customer',
+      completed: customers.length > 0,
+    },
+    {
+      key: 'points',
+      label: 'Issue your first points activity',
+      completed: false,
+    },
+    {
+      key: 'passes',
+      label: 'Create your first wallet pass',
+      completed: Boolean(passQuery.data?.data?.id),
+    },
+  ];
+
+  const completedSteps = onboardingSteps.filter((step) => step.completed).length;
+  const progressPercent = Math.round((completedSteps / onboardingSteps.length) * 100);
+  const onboardingStatusLabel = businessProfile?.onboarding_status || 'not_started';
+
   function handleCreate(event) {
     event.preventDefault();
     createMutation.mutate(createForm);
@@ -100,6 +127,23 @@ export default function ClientCustomersDashboard() {
       </header>
 
       <section className={styles.grid}>
+        <article className={styles.card}>
+          <h2>Onboarding Guide</h2>
+          <div className={styles.notice}>
+            <p><strong>Status:</strong> {onboardingStatusLabel}</p>
+            <p><strong>Plan:</strong> {businessProfile?.plan || 'starter'}</p>
+            <p><strong>Progress:</strong> {progressPercent}% complete</p>
+          </div>
+          <ul>
+            {onboardingSteps.map((step) => (
+              <li key={step.key} style={{ marginBottom: '0.75rem' }}>
+                <strong>{step.completed ? '✓' : '○'}</strong> {step.label}
+              </li>
+            ))}
+          </ul>
+          <p className={styles.status}>Next step: {onboardingSteps.find((step) => !step.completed)?.label || 'You are fully set up.'}</p>
+        </article>
+
         <article className={styles.card}>
           <h2>Create Customer</h2>
           <form onSubmit={handleCreate} className={styles.form}>
