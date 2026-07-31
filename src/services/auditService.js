@@ -19,6 +19,17 @@ class AuditService {
     }
   }
 
+  static async pruneAuditLogs({ retentionDays = 90 } = {}) {
+    const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+    const result = await AuditLog.destroy({ where: { createdAt: { [Op.lt]: cutoffDate } } });
+
+    if (result > 0) {
+      logger.info('Audit logs pruned', { retainedDays: retentionDays, deletedCount: result });
+    }
+
+    return result;
+  }
+
   static async listAuditLogs({ page = 1, pageSize = 25, filters = {}, user = {} }) {
     const where = {};
 

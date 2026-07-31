@@ -127,7 +127,10 @@ POST /api/points/redeem
 
 ```bash
 GET /api/audit-logs
+DELETE /api/audit-logs/retention?retentionDays=90
 ```
+
+The retention endpoint is restricted to platform admins and removes older audit records based on the configured retention window.
 
 ## Notes
 
