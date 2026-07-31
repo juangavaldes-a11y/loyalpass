@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createClient, getClient, updateClient } from '@/features/admin/api/clientsApi';
+import { createClient, getClient, updateClient, updateOnboarding } from '@/features/admin/api/clientsApi';
 
 export function useCreateClient() {
   const queryClient = useQueryClient();
@@ -25,6 +25,20 @@ export function useUpdateClient() {
 
   return useMutation({
     mutationFn: updateClient,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'clients', variables.businessId],
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'clients'] });
+    },
+  });
+}
+
+export function useUpdateOnboarding() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateOnboarding,
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['admin', 'clients', variables.businessId],

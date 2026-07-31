@@ -19,3 +19,11 @@ export async function updateClient({ businessId, updates }) {
   });
   return response.data;
 }
+
+export async function updateOnboarding({ businessId, payload }) {
+  const response = await portalApi.post('/admin/clients/onboarding', {
+    businessId,
+    payload,
+  });
+  return response.data;
+}

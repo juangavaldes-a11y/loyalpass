@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useClientLookup, useCreateClient, useUpdateClient } from '@/features/admin/hooks/useClients';
+import { useClientLookup, useCreateClient, useUpdateClient, useUpdateOnboarding } from '@/features/admin/hooks/useClients';
 import styles from '@/app/portal.module.css';
 
 function statusFromMutation(mutation) {
@@ -32,8 +32,15 @@ export default function AdminClientsDashboard() {
     text_color: '',
   });
 
+  const [onboardingForm, setOnboardingForm] = useState({
+    onboardingStatus: 'not_started',
+    plan: 'starter',
+    trialEndsAt: '',
+  });
+
   const createClientMutation = useCreateClient();
   const updateClientMutation = useUpdateClient();
+  const updateOnboardingMutation = useUpdateOnboarding();
   const businessListQuery = useClientLookup({});
   const clientLookup = useClientLookup({ businessId: lookup.businessId });
 
@@ -66,6 +73,19 @@ export default function AdminClientsDashboard() {
       businessId: lookup.businessId,
       apiKey: lookup.apiKey,
       updates: updatePayload,
+    });
+  }
+
+  function handleOnboarding(event) {
+    event.preventDefault();
+
+    updateOnboardingMutation.mutate({
+      businessId: lookup.businessId,
+      payload: {
+        onboardingStatus: onboardingForm.onboardingStatus,
+        plan: onboardingForm.plan,
+        trialEndsAt: onboardingForm.trialEndsAt || undefined,
+      },
     });
   }
 
@@ -188,6 +208,40 @@ export default function AdminClientsDashboard() {
             <p className={styles.status}>{statusFromMutation(updateClientMutation)}</p>
           ) : null}
         </article>
+
+        <article className={styles.card}>
+          <h2>Onboarding & Plan</h2>
+          <form onSubmit={handleOnboarding} className={styles.form}>
+            <select
+              value={onboardingForm.onboardingStatus}
+              onChange={(event) => setOnboardingForm((prev) => ({ ...prev, onboardingStatus: event.target.value }))}
+            >
+              <option value="not_started">Not started</option>
+              <option value="in_progress">In progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select
+              value={onboardingForm.plan}
+              onChange={(event) => setOnboardingForm((prev) => ({ ...prev, plan: event.target.value }))}
+            >
+              <option value="starter">Starter</option>
+              <option value="growth">Growth</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            <input
+              type="date"
+              value={onboardingForm.trialEndsAt}
+              onChange={(event) => setOnboardingForm((prev) => ({ ...prev, trialEndsAt: event.target.value }))}
+            />
+            <button type="submit" disabled={updateOnboardingMutation.isPending || !lookup.businessId}>
+              Save onboarding
+            </button>
+          </form>
+
+          {statusFromMutation(updateOnboardingMutation) ? (
+            <p className={styles.status}>{statusFromMutation(updateOnboardingMutation)}</p>
+          ) : null}
+        </article>
       </section>
 
       <section className={styles.card}>
@@ -207,7 +261,8 @@ export default function AdminClientsDashboard() {
               <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Brand</th>
+                <th>Plan</th>
+                <th>Onboarding</th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +270,8 @@ export default function AdminClientsDashboard() {
                 <tr key={business.id}>
                   <td>{business.id}</td>
                   <td>{business.name}</td>
-                  <td>{business.brand_color || 'N/A'}</td>
+                  <td>{business.plan || 'starter'}</td>
+                  <td>{business.onboarding_status || 'not_started'}</td>
                 </tr>
               ))}
             </tbody>
