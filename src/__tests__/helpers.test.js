@@ -14,6 +14,12 @@ describe('shared helpers', () => {
     expect(updates).toEqual({ name: 'Jane', email: 'jane@example.com' });
   });
 
+  test('maps subscription and onboarding payloads to model field names', () => {
+    const updates = mapBusinessUpdates({ plan: 'growth', onboardingStatus: 'completed' });
+
+    expect(updates).toEqual({ plan: 'growth', onboarding_status: 'completed' });
+  });
+
   test('allows platform admin to access any business', () => {
     expect(() => assertBusinessAccess({ isPlatformAdmin: true }, 'business-1')).not.toThrow();
   });

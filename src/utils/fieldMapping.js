@@ -7,6 +7,11 @@ function mapBusinessUpdates(updates = {}) {
   if (updates.logo_url) mappedUpdates.logo_url = updates.logo_url;
   if (updates.brand_color) mappedUpdates.brand_color = updates.brand_color;
   if (updates.text_color) mappedUpdates.text_color = updates.text_color;
+  if (updates.plan) mappedUpdates.plan = updates.plan;
+  if (updates.onboardingStatus) mappedUpdates.onboarding_status = updates.onboardingStatus;
+  if (updates.onboarding_status) mappedUpdates.onboarding_status = updates.onboarding_status;
+  if (updates.trialEndsAt) mappedUpdates.trial_ends_at = updates.trialEndsAt;
+  if (updates.trial_ends_at) mappedUpdates.trial_ends_at = updates.trial_ends_at;
   return mappedUpdates;
 }
 

@@ -25,6 +25,20 @@ const Business = sequelize.define(
       type: DataTypes.STRING(7),
       allowNull: true,
     },
+    plan: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'starter',
+    },
+    onboarding_status: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'not_started',
+    },
+    trial_ends_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

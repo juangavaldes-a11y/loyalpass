@@ -27,6 +27,8 @@ class BusinessService {
           email: ownerUser.email,
           password: ownerPassword,
         },
+        plan: business.plan,
+        onboardingStatus: business.onboarding_status,
       };
     } catch (error) {
       logger.error('Error creating business:', error);
