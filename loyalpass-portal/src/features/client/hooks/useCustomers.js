@@ -1,10 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createCustomer, getCustomers, updateCustomer } from '@/features/client/api/customersApi';
+import { createCustomer, getBusinessProfile, getCustomers, updateCustomer } from '@/features/client/api/customersApi';
 
 export function useCustomers() {
   return useQuery({
     queryKey: ['client', 'customers'],
     queryFn: getCustomers,
+  });
+}
+
+export function useBusinessProfile() {
+  return useQuery({
+    queryKey: ['client', 'business'],
+    queryFn: getBusinessProfile,
   });
 }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCreateCustomer, useCustomers, useUpdateCustomer } from '@/features/client/hooks/useCustomers';
+import { useBusinessProfile, useCreateCustomer, useCustomers, useUpdateCustomer } from '@/features/client/hooks/useCustomers';
 import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
 import styles from '@/app/portal.module.css';
@@ -21,6 +21,7 @@ export default function ClientCustomersDashboard() {
   const [pointsForm, setPointsForm] = useState({ customerId: '', amount: '' });
   const [passForm, setPassForm] = useState({ customerId: '', passId: '' });
 
+  const businessProfileQuery = useBusinessProfile();
   const customersQuery = useCustomers();
   const createMutation = useCreateCustomer();
   const updateMutation = useUpdateCustomer();
@@ -33,6 +34,7 @@ export default function ClientCustomersDashboard() {
   const passQuery = usePass(passForm.customerId);
 
   const customers = customersQuery.data?.data || [];
+  const businessProfile = businessProfileQuery.data?.data || null;
 
   function handleCreate(event) {
     event.preventDefault();
