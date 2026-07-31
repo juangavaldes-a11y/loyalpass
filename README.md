@@ -1,262 +1,138 @@
-# LoyalPass Backend - Node.js Express Server
+# LoyalPass Backend
 
-Multi-business loyalty platform with Apple Wallet and Google Wallet integration.
+LoyalPass is a multi-tenant loyalty platform backend for managing businesses, customers, wallet passes, and points. The current implementation includes tenant-aware APIs, onboarding and billing metadata, export workflows, audit logging, and health diagnostics that make it suitable for pilot service deployments.
 
-## Features
+## What the app currently does
 
-✅ Multi-tenant architecture - multiple businesses can issue wallet passes
-✅ Wallet integration - Apple Wallet (.pkpass) and Google Wallet support
-✅ Points management - dynamic points updates
-✅ API key authentication - secure business access
-✅ PostgreSQL database - robust data persistence
-✅ RESTful API - clean endpoint design
+- Creates and manages businesses with onboarding, billing, and plan metadata
+- Supports platform-admin and business-scoped access control
+- Creates and updates customer records for each business tenant
+- Issues and updates loyalty points balances
+- Generates wallet-pass records for Apple Wallet and Google Wallet integrations
+- Exposes export and deletion workflows for business data
+- Provides audit logs and a health endpoint for operational visibility
 
-## Setup Instructions
-
-### 1. Prerequisites
+## Prerequisites
 
 - Node.js 18+
-- PostgreSQL 12+
-- npm or yarn
+- npm 9+
+- Optional: Docker and Docker Compose
 
-### 2. Installation
+## Quick start
+
+1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Environment Configuration
-
-Copy `.env.example` to `.env` and fill in your credentials:
+2. Create your environment file
 
 ```bash
 cp .env.example .env
 ```
 
-**Required environment variables:**
-
-```
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=loyalpass
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# Apple Wallet
-APPLE_TEAM_ID=your_apple_team_id
-APPLE_KEY_ID=your_apple_key_id
-APPLE_CERTIFICATE_PATH=./path/to/certificate.p8
-
-# Google Wallet
-GOOGLE_PROJECT_ID=your_google_project_id
-GOOGLE_SERVICE_ACCOUNT_PATH=./path/to/service-account-key.json
-GOOGLE_ISSUER_ID=your_issuer_id
-```
-
-### 4. Database Setup
-
-Create PostgreSQL database:
-
-```bash
-createdb loyalpass
-```
-
-Run migrations:
-
-```bash
-npm run migrate
-```
-
-### 5. Start Server
-
-Development mode (with auto-reload):
+3. Start the API locally
 
 ```bash
 npm run dev
 ```
 
-Production mode:
+The server listens on http://localhost:3000 by default.
+
+### Default behavior
+
+- The default configuration uses SQLite for local development.
+- Set `DB_DIALECT=postgres` and provide Postgres credentials if you want to run against PostgreSQL.
+- Wallet integrations are optional; if Apple or Google credentials are missing, pass creation still succeeds but the wallet-specific payloads are skipped gracefully.
+
+## Useful commands
 
 ```bash
-npm start
+npm start           # production mode
+npm run dev         # development mode with nodemon
+npm test            # run the Jest suite
+npm run lint        # placeholder script for now
 ```
 
-Server will run on `http://localhost:3000`
+## Docker
 
-## API Endpoints
+```bash
+docker compose up --build
+```
+
+The container uses the same environment variables as the local run and exposes the API on port 3000.
+
+## Main API entry points
+
+### Health
+
+```bash
+GET /health
+```
 
 ### Authentication
 
-All endpoints (except `/health` and `POST /api/businesses`) require:
-
-```
-X-API-KEY: your_api_key
+```bash
+POST /api/auth/login
 ```
 
-### Business Management
+Request body:
 
-**Create Business** (No auth required)
+```json
+{
+  "email": "admin@loyalpass.local",
+  "password": "admin123"
+}
 ```
+
+### Business management
+
+```bash
 POST /api/businesses
-Content-Type: application/json
-
-{
-  "name": "Coffee Shop",
-  "logo_url": "https://example.com/logo.png",
-  "brand_color": "#FF6600",
-  "text_color": "#FFFFFF"
-}
-
-Response:
-{
-  "success": true,
-  "data": {
-    "business": { ... },
-    "apiKey": "your_api_key_here"
-  }
-}
-```
-
-**Get Business**
-```
+GET /api/businesses
 GET /api/businesses/:id
-Header: X-API-KEY: your_api_key
-```
-
-**Update Business**
-```
 PUT /api/businesses/:id
-Header: X-API-KEY: your_api_key
-
-{
-  "name": "Updated Name",
-  "brand_color": "#FF9900"
-}
+GET /api/businesses/:id/quota-status
+GET /api/businesses/:id/export
+DELETE /api/businesses/:id/export
 ```
 
-**Get API Keys**
-```
-GET /api/businesses/:id/api-keys
-Header: X-API-KEY: your_api_key
-```
+### Customer management
 
-**Create API Key**
-```
-POST /api/businesses/:id/api-keys
-Header: X-API-KEY: your_api_key
-```
-
-**Rotate API Key** (deactivate old, create new)
-```
-POST /api/businesses/:id/api-keys/rotate
-Header: X-API-KEY: your_api_key
-```
-
-### Customer Management
-
-**Create Customer**
-```
+```bash
 POST /api/customers
-Header: X-API-KEY: your_api_key
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
-```
-
-**Get Customer**
-```
-GET /api/customers/:id
-Header: X-API-KEY: your_api_key
-```
-
-**List Customers**
-```
 GET /api/customers
-Header: X-API-KEY: your_api_key
-```
-
-**Update Customer**
-```
+GET /api/customers/:id
 PUT /api/customers/:id
-Header: X-API-KEY: your_api_key
-
-{
-  "name": "Jane Doe"
-}
 ```
 
-### Pass Management
+### Wallet passes
 
-**Create Pass** (Apple Wallet & Google Wallet)
-```
+```bash
 POST /api/passes/create
-Header: X-API-KEY: your_api_key
-Content-Type: application/json
-
-{
-  "customer_id": "uuid-here"
-}
-
-Response includes:
-- apple_pass_serial (for .pkpass file)
-- google_pass_object_id (for Google Wallet)
-```
-
-**Update Pass** (push updates to wallet)
-```
 POST /api/passes/update
-Header: X-API-KEY: your_api_key
-
-{
-  "pass_id": "uuid",
-  "customer_id": "uuid"
-}
-```
-
-**Get Pass by Customer**
-```
 GET /api/passes/:customerId
-Header: X-API-KEY: your_api_key
 ```
 
-### Points Management
+### Points
 
-**Get Points Balance**
-```
+```bash
 GET /api/points/:customerId
-Header: X-API-KEY: your_api_key
-```
-
-**Add Points** (after purchase)
-```
 POST /api/points/add
-Header: X-API-KEY: your_api_key
-Content-Type: application/json
-
-{
-  "customer_id": "uuid",
-  "amount": 50
-}
-```
-
-**Redeem Points** (customer redeems for reward)
-```
 POST /api/points/redeem
-Header: X-API-KEY: your_api_key
-
-{
-  "customer_id": "uuid",
-  "amount": 100
-}
 ```
+
+### Audit logs
+
+```bash
+GET /api/audit-logs
+```
+
+## Notes
+
+- Most business-scoped endpoints require a valid API key or portal authorization token, depending on the route.
+- The platform admin seed user defaults to `admin@loyalpass.local` / `admin123` when those values are configured through environment variables.
 
 ## Architecture
 

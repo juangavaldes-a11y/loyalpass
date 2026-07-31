@@ -42,9 +42,10 @@ const mergedConfig = {
     host: getEnvOrDefault('DB_HOST', getConfigValue('db', 'host', 'localhost')),
     port: getEnvOrDefault('DB_PORT', getConfigValue('db', 'port', 5432)),
     database: getEnvOrDefault('DB_NAME', getConfigValue('db', 'database', 'loyalpass')),
-    username: getEnvOrDefault('DB_USER', getConfigValue('db', 'username', 'postgres')),
-    password: getSecretValue('DB_PASSWORD', getConfigValue('db', 'password', 'postgres')),
-    dialect: getEnvOrDefault('DB_DIALECT', getConfigValue('db', 'dialect', 'postgres')),
+    username: getEnvOrDefault('DB_USERNAME', getEnvOrDefault('DB_USER', getConfigValue('db', 'username', 'postgres'))),
+    password: getSecretValue('DB_PASSWORD', getSecretValue('DB_PASS', getConfigValue('db', 'password', 'postgres'))),
+    dialect: getEnvOrDefault('DB_DIALECT', getConfigValue('db', 'dialect', 'sqlite')),
+    storage: getEnvOrDefault('DB_STORAGE', getConfigValue('db', 'storage', './dev.sqlite3')),
     logging: getEnvOrDefault('DB_LOGGING', getConfigValue('db', 'logging', false)),
   },
   app: {

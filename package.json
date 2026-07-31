@@ -4,9 +4,9 @@
   "description": "Multi-business loyalty platform with Apple Wallet and Google Wallet integration",
   "main": "src/server.js",
   "scripts": {
-    "start": "NODE_ENV=production node src/server.js",
+    "start": "node -e \"process.env.NODE_ENV='production'; require('./src/server.js')\"",
     "lint": "node -e \"console.log('No lint config configured')\"",
-    "dev": "NODE_ENV=development nodemon src/server.js",
+    "dev": "nodemon --exec \"node -e process.env.NODE_ENV='development'; require('./src/server.js')\"",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo:all",
     "db:seed": "sequelize-cli db:seed:all",
