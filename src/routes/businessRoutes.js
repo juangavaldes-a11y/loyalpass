@@ -28,5 +28,7 @@ router.post('/:id/api-keys/rotate', writeLimiter, BusinessController.rotateApiKe
 router.get('/:id/export', BusinessController.exportBusinessData);
 router.delete('/:id/export', writeLimiter, BusinessController.deleteBusinessData);
 router.get('/:id/support', BusinessController.getSupportPolicy);
+router.post('/:id/backup', writeLimiter, BusinessController.createBackup);
+router.post('/:id/restore', writeLimiter, BusinessController.restoreBackup);
 
 module.exports = router;

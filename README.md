@@ -132,6 +132,15 @@ DELETE /api/audit-logs/retention?retentionDays=90
 
 The retention endpoint is restricted to platform admins and removes older audit records based on the configured retention window.
 
+### Backup and restore
+
+```bash
+POST /api/businesses/:id/backup
+POST /api/businesses/:id/restore
+```
+
+Backups are written to the local `backups/` directory by default and can be restored with the generated backup file path.
+
 ## Notes
 
 - Most business-scoped endpoints require a valid API key or portal authorization token, depending on the route.

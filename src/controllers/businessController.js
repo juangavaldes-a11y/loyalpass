@@ -1,6 +1,7 @@
 const BusinessService = require('../services/businessService');
 const ExportService = require('../services/exportService');
 const SupportService = require('../services/supportService');
+const BackupService = require('../services/backupService');
 const logger = require('../utils/logger');
 const { assertPlatformAdmin, assertBusinessAccess } = require('../utils/tenantAccess');
 const { sendSuccess, sendError } = require('../utils/httpResponses');
@@ -279,6 +280,40 @@ class BusinessController {
         data: { key },
         message: 'Old API keys have been deactivated',
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async createBackup(req, res, next) {
+    try {
+      const { id } = req.params;
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return res.status(403).json({ success: false, message: error.message });
+      }
+
+      const backup = await BackupService.createBackup();
+      return sendSuccess(res, 200, { data: backup, message: 'Backup created successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async restoreBackup(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { inputPath } = req.body;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return res.status(403).json({ success: false, message: error.message });
+      }
+
+      const result = await BackupService.restoreBackup({ inputPath });
+      return sendSuccess(res, 200, { data: result, message: 'Backup restored successfully' });
     } catch (error) {
       next(error);
     }

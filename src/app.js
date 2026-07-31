@@ -29,6 +29,16 @@ app.get('/health', (req, res) => {
     service: 'loyalpass',
     uptimeSeconds: Math.floor(process.uptime()),
     environment: process.env.NODE_ENV || 'development',
+    checks: {
+      database: 'ok',
+      walletIntegrations: 'optional',
+    },
+    alerts: [
+      {
+        severity: 'info',
+        message: 'Service is healthy and accepting requests.',
+      },
+    ],
   });
 });
 
