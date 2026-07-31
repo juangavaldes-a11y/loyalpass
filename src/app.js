@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const apiKeyAuth = require('./middleware/authMiddleware');
+const { generalApiLimiter, authLimiter } = require('./middleware/rateLimitMiddleware');
+const authRoutes = require('./routes/authRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 
 // Routes
@@ -26,8 +29,13 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Auth routes
+app.use('/api', generalApiLimiter);
+app.use('/api/auth', authLimiter, authRoutes);
+
 // API Routes
 app.use('/api/businesses', businessRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 // All other routes require API key auth
 app.use(apiKeyAuth);

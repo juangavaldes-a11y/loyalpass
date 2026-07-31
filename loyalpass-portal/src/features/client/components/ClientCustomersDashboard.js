@@ -1,0 +1,248 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCreateCustomer, useCustomers, useUpdateCustomer } from '@/features/client/hooks/useCustomers';
+import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
+import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
+import styles from '@/app/portal.module.css';
+
+function mutationStatus(mutation) {
+  if (mutation.isPending) return 'Working...';
+  if (mutation.isSuccess) return 'Completed successfully.';
+  if (mutation.isError) return mutation.error?.message || 'Request failed.';
+  return null;
+}
+
+export default function ClientCustomersDashboard() {
+  const router = useRouter();
+  const [createForm, setCreateForm] = useState({ name: '', email: '' });
+  const [editForm, setEditForm] = useState({ customerId: '', name: '', email: '' });
+  const [pointsForm, setPointsForm] = useState({ customerId: '', amount: '' });
+  const [passForm, setPassForm] = useState({ customerId: '', passId: '' });
+
+  const customersQuery = useCustomers();
+  const createMutation = useCreateCustomer();
+  const updateMutation = useUpdateCustomer();
+  const addPointsMutation = useAddPoints();
+  const redeemPointsMutation = useRedeemPoints();
+  const createPassMutation = useCreatePass();
+  const updatePassMutation = useUpdatePass();
+
+  const pointsQuery = usePoints(pointsForm.customerId);
+  const passQuery = usePass(passForm.customerId);
+
+  const customers = customersQuery.data?.data || [];
+
+  function handleCreate(event) {
+    event.preventDefault();
+    createMutation.mutate(createForm);
+  }
+
+  function handleUpdate(event) {
+    event.preventDefault();
+
+    updateMutation.mutate({
+      customerId: editForm.customerId,
+      updates: {
+        ...(editForm.name ? { name: editForm.name } : {}),
+        ...(editForm.email ? { email: editForm.email } : {}),
+      },
+    });
+  }
+
+  function handleAddPoints(event) {
+    event.preventDefault();
+    addPointsMutation.mutate({
+      customerId: pointsForm.customerId,
+      amount: Number(pointsForm.amount),
+    });
+  }
+
+  function handleRedeemPoints(event) {
+    event.preventDefault();
+    redeemPointsMutation.mutate({
+      customerId: pointsForm.customerId,
+      amount: Number(pointsForm.amount),
+    });
+  }
+
+  function handleCreatePass(event) {
+    event.preventDefault();
+    createPassMutation.mutate(passForm.customerId);
+  }
+
+  function handleUpdatePass(event) {
+    event.preventDefault();
+    updatePassMutation.mutate({
+      customerId: passForm.customerId,
+      passId: passForm.passId,
+    });
+  }
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  }
+
+  return (
+    <div className={styles.pageShell}>
+      <header className={styles.hero}>
+        <p className={styles.kicker}>Client Portal</p>
+        <h1>Customer Management</h1>
+        <p>Add and update loyalty members with a cached query layer for responsive workflows.</p>
+        <button type="button" className={styles.ghostButton} onClick={handleLogout}>
+          Logout
+        </button>
+      </header>
+
+      <section className={styles.grid}>
+        <article className={styles.card}>
+          <h2>Create Customer</h2>
+          <form onSubmit={handleCreate} className={styles.form}>
+            <input
+              placeholder="Customer name"
+              value={createForm.name}
+              onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
+              required
+            />
+            <input
+              type="email"
+              placeholder="customer@email.com"
+              value={createForm.email}
+              onChange={(event) => setCreateForm((prev) => ({ ...prev, email: event.target.value }))}
+              required
+            />
+            <button type="submit" disabled={createMutation.isPending}>Create customer</button>
+          </form>
+          {mutationStatus(createMutation) ? <p className={styles.status}>{mutationStatus(createMutation)}</p> : null}
+        </article>
+
+        <article className={styles.card}>
+          <h2>Update Customer</h2>
+          <form onSubmit={handleUpdate} className={styles.form}>
+            <input
+              placeholder="Customer ID"
+              value={editForm.customerId}
+              onChange={(event) => setEditForm((prev) => ({ ...prev, customerId: event.target.value }))}
+              required
+            />
+            <input
+              placeholder="New name"
+              value={editForm.name}
+              onChange={(event) => setEditForm((prev) => ({ ...prev, name: event.target.value }))}
+            />
+            <input
+              type="email"
+              placeholder="new@email.com"
+              value={editForm.email}
+              onChange={(event) => setEditForm((prev) => ({ ...prev, email: event.target.value }))}
+            />
+            <button type="submit" disabled={updateMutation.isPending}>Update customer</button>
+          </form>
+          {mutationStatus(updateMutation) ? <p className={styles.status}>{mutationStatus(updateMutation)}</p> : null}
+        </article>
+      </section>
+
+      <section className={styles.grid}>
+        <article className={styles.card}>
+          <h2>Points</h2>
+          <form className={styles.form} onSubmit={handleAddPoints}>
+            <input
+              placeholder="Customer ID"
+              value={pointsForm.customerId}
+              onChange={(event) => setPointsForm((prev) => ({ ...prev, customerId: event.target.value }))}
+              required
+            />
+            <input
+              type="number"
+              min="1"
+              placeholder="Amount"
+              value={pointsForm.amount}
+              onChange={(event) => setPointsForm((prev) => ({ ...prev, amount: event.target.value }))}
+              required
+            />
+            <button type="submit" disabled={addPointsMutation.isPending}>Add points</button>
+            <button type="button" onClick={handleRedeemPoints} disabled={redeemPointsMutation.isPending}>
+              Redeem points
+            </button>
+          </form>
+          {mutationStatus(addPointsMutation) ? <p className={styles.status}>{mutationStatus(addPointsMutation)}</p> : null}
+          {mutationStatus(redeemPointsMutation) ? <p className={styles.status}>{mutationStatus(redeemPointsMutation)}</p> : null}
+          {pointsQuery.data?.data ? (
+            <p className={styles.status}>Balance: {pointsQuery.data.data.balance}</p>
+          ) : null}
+        </article>
+
+        <article className={styles.card}>
+          <h2>Passes</h2>
+          <form className={styles.form} onSubmit={handleCreatePass}>
+            <input
+              placeholder="Customer ID"
+              value={passForm.customerId}
+              onChange={(event) => setPassForm((prev) => ({ ...prev, customerId: event.target.value }))}
+              required
+            />
+            <button type="submit" disabled={createPassMutation.isPending}>Create pass</button>
+          </form>
+
+          <form className={styles.form} onSubmit={handleUpdatePass}>
+            <input
+              placeholder="Pass ID"
+              value={passForm.passId}
+              onChange={(event) => setPassForm((prev) => ({ ...prev, passId: event.target.value }))}
+              required
+            />
+            <button type="submit" disabled={updatePassMutation.isPending || !passForm.customerId}>
+              Update pass
+            </button>
+          </form>
+
+          {mutationStatus(createPassMutation) ? <p className={styles.status}>{mutationStatus(createPassMutation)}</p> : null}
+          {mutationStatus(updatePassMutation) ? <p className={styles.status}>{mutationStatus(updatePassMutation)}</p> : null}
+          {passQuery.data?.data ? (
+            <div className={styles.notice}>
+              <p><strong>Pass ID:</strong> {passQuery.data.data.id}</p>
+              <p><strong>Apple Serial:</strong> {passQuery.data.data.apple_pass_serial || 'N/A'}</p>
+              <p><strong>Google Object:</strong> {passQuery.data.data.google_pass_object_id || 'N/A'}</p>
+            </div>
+          ) : null}
+        </article>
+      </section>
+
+      <section className={styles.card}>
+        <div className={styles.sectionHeader}>
+          <h2>Customer List</h2>
+          <button type="button" onClick={() => customersQuery.refetch()} disabled={customersQuery.isFetching}>
+            Refresh
+          </button>
+        </div>
+
+        {customersQuery.isLoading ? <p>Loading customers...</p> : null}
+        {customersQuery.error ? <p className={styles.status}>{customersQuery.error.message}</p> : null}
+
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map((customer) => (
+                <tr key={customer.id}>
+                  <td>{customer.id}</td>
+                  <td>{customer.name}</td>
+                  <td>{customer.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}

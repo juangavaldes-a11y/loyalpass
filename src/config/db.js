@@ -42,7 +42,7 @@ sequelize
 
 // Sync models (creates tables if they don't exist)
 // In production, use migrations instead
-if (process.env.NODE_ENV !== 'production') {
+if (!['production', 'test'].includes(process.env.NODE_ENV)) {
   sequelize.sync({ alter: true }).catch((err) => {
     logger.error('Database sync failed:', err);
   });

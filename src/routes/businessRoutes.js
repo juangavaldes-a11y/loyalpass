@@ -1,24 +1,26 @@
 const express = require('express');
 const BusinessController = require('../controllers/businessController');
-const apiKeyAuth = require('../middleware/authMiddleware');
+const adminAuth = require('../middleware/adminAuthMiddleware');
+const { writeLimiter } = require('../middleware/rateLimitMiddleware');
 
 const router = express.Router();
 
-// Create business (no auth - initial setup)
-router.post('/', BusinessController.createBusiness);
+// Create and list businesses require admin auth
+router.post('/', writeLimiter, adminAuth, BusinessController.createBusiness);
+router.get('/', adminAuth, BusinessController.listBusinesses);
 
-// Require API key auth for all other routes
-router.use(apiKeyAuth);
+// Require JWT auth for all other routes
+router.use(adminAuth);
 
 // Get business details
 router.get('/:id', BusinessController.getBusiness);
 
 // Update business
-router.put('/:id', BusinessController.updateBusiness);
+router.put('/:id', writeLimiter, BusinessController.updateBusiness);
 
 // API Key management
 router.get('/:id/api-keys', BusinessController.getApiKeys);
-router.post('/:id/api-keys', BusinessController.createApiKey);
-router.post('/:id/api-keys/rotate', BusinessController.rotateApiKey);
+router.post('/:id/api-keys', writeLimiter, BusinessController.createApiKey);
+router.post('/:id/api-keys/rotate', writeLimiter, BusinessController.rotateApiKey);
 
 module.exports = router;

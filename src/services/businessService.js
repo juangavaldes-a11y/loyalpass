@@ -1,4 +1,7 @@
+const crypto = require('crypto');
 const { Business, ApiKey } = require('../models');
+const AuthService = require('./authService');
+const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 
 class BusinessService {
@@ -20,11 +23,28 @@ class BusinessService {
         business_id: business.id,
       });
 
+      const ownerPassword = crypto.randomBytes(8).toString('hex');
+      const ownerUser = await AuthService.createBusinessOwnerUser(business, ownerPassword, apiKey.key);
+
+      await AuditService.log({
+        businessId: business.id,
+        actorType: 'system',
+        actorId: 'system',
+        action: 'business.create',
+        entityType: 'business',
+        entityId: business.id,
+        metadata: { name: business.name, ownerEmail: ownerUser.email },
+      });
+
       logger.info(`Business created: ${business.id}`);
 
       return {
         business: business.toJSON(),
         apiKey: apiKey.key, // Only return the key once
+        owner: {
+          email: ownerUser.email,
+          password: ownerPassword,
+        },
       };
     } catch (error) {
       logger.error('Error creating business:', error);
@@ -66,6 +86,15 @@ class BusinessService {
       if (updates.textColor) mappedUpdates.text_color = updates.textColor;
 
       await business.update(mappedUpdates);
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'business.update',
+        entityType: 'business',
+        entityId: businessId,
+        metadata: mappedUpdates,
+      });
       logger.info(`Business updated: ${businessId}`);
       return business.toJSON();
     } catch (error) {
@@ -120,10 +149,27 @@ class BusinessService {
       const newKey = await ApiKey.create({
         business_id: businessId,
       });
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'api_key.rotate',
+        entityType: 'api_key',
+        entityId: businessId,
+      });
       logger.info(`API key rotated for business: ${businessId}`);
       return newKey.key;
     } catch (error) {
       logger.error('Error rotating API key:', error);
+      throw error;
+    }
+  }
+
+  static async listBusinesses() {
+    try {
+      return await Business.findAll({ order: [['createdAt', 'DESC']] });
+    } catch (error) {
+      logger.error('Error listing businesses:', error);
       throw error;
     }
   }

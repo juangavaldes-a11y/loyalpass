@@ -1,4 +1,3 @@
-const pkpass = require('pkpass');
 const { v4: uuidv4 } = require('uuid');
 const appleConfig = require('../config/appleWallet');
 const { applePassTemplate } = require('../utils/passTemplates');
@@ -26,6 +25,9 @@ class ApplePassService {
 
       // Get pass template
       const passData = applePassTemplate(business, customer, points, null);
+
+      // Load pkpass only when Apple Wallet generation is actually enabled.
+      const pkpass = require('pkpass');
 
       // Create pass using pkpass library
       const pass = new pkpass.Pass(passData, {

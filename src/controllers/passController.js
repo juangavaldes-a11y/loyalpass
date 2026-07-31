@@ -43,6 +43,7 @@ class PassController {
   static async updatePass(req, res, next) {
     try {
       const { pass_id, customer_id } = req.body;
+      const businessId = req.businessId;
 
       if (!pass_id || !customer_id) {
         return res.status(400).json({
@@ -51,7 +52,7 @@ class PassController {
         });
       }
 
-      const pass = await PassService.updatePass(pass_id, customer_id, null);
+      const pass = await PassService.updatePass(businessId, pass_id, customer_id, null);
 
       res.status(200).json({
         success: true,
@@ -74,8 +75,9 @@ class PassController {
   static async getPassByCustomer(req, res, next) {
     try {
       const { customerId } = req.params;
+      const businessId = req.businessId;
 
-      const pass = await PassService.getPassByCustomerId(customerId);
+      const pass = await PassService.getPassByCustomerId(businessId, customerId);
 
       res.status(200).json({
         success: true,

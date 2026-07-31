@@ -7,6 +7,13 @@ class BusinessController {
    */
   static async createBusiness(req, res, next) {
     try {
+      if (!req.isPlatformAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: Admin access required',
+        });
+      }
+
       const { name, logo_url, brand_color, text_color } = req.body;
 
       if (!name) {
@@ -33,14 +40,38 @@ class BusinessController {
   }
 
   /**
+   * GET /api/businesses
+   */
+  static async listBusinesses(req, res, next) {
+    try {
+      if (!req.isPlatformAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Forbidden: Admin access required',
+        });
+      }
+
+      const businesses = await BusinessService.listBusinesses();
+
+      res.status(200).json({
+        success: true,
+        data: businesses,
+        count: businesses.length,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/businesses/:id
    */
   static async getBusiness(req, res, next) {
     try {
       const { id } = req.params;
 
-      // Verify business belongs to request (security check)
-      if (id !== req.businessId) {
+      // Platform admins can access all businesses; client users can only access their own.
+      if (!req.isPlatformAdmin && id !== req.businessId) {
         return res.status(403).json({
           success: false,
           message: 'Forbidden: Access denied',
@@ -71,8 +102,7 @@ class BusinessController {
     try {
       const { id } = req.params;
 
-      // Verify business belongs to request
-      if (id !== req.businessId) {
+      if (!req.isPlatformAdmin && id !== req.businessId) {
         return res.status(403).json({
           success: false,
           message: 'Forbidden: Access denied',
@@ -97,8 +127,7 @@ class BusinessController {
     try {
       const { id } = req.params;
 
-      // Verify business belongs to request
-      if (id !== req.businessId) {
+      if (!req.isPlatformAdmin && id !== req.businessId) {
         return res.status(403).json({
           success: false,
           message: 'Forbidden: Access denied',
@@ -123,8 +152,7 @@ class BusinessController {
     try {
       const { id } = req.params;
 
-      // Verify business belongs to request
-      if (id !== req.businessId) {
+      if (!req.isPlatformAdmin && id !== req.businessId) {
         return res.status(403).json({
           success: false,
           message: 'Forbidden: Access denied',
@@ -150,8 +178,7 @@ class BusinessController {
     try {
       const { id } = req.params;
 
-      // Verify business belongs to request
-      if (id !== req.businessId) {
+      if (!req.isPlatformAdmin && id !== req.businessId) {
         return res.status(403).json({
           success: false,
           message: 'Forbidden: Access denied',

@@ -16,7 +16,12 @@ const apiKeyAuth = async (req, res, next) => {
     }
 
     // Look up the API key in database
-    const keyRecord = await ApiKey.getByKey(apiKey);
+    const keyRecord = await ApiKey.findOne({
+      where: {
+        key: apiKey,
+        active: true,
+      },
+    });
 
     if (!keyRecord) {
       logger.warn(`Invalid API key attempt: ${apiKey.substring(0, 10)}...`);

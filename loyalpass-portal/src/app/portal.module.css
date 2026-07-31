@@ -1,0 +1,152 @@
+.pageShell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.hero {
+  background: linear-gradient(125deg, #0f2c4d 0%, #164f6e 45%, #1f7a78 100%);
+  color: #f4fbff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 15px 30px rgba(15, 44, 77, 0.2);
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.85;
+}
+
+.hero h1 {
+  font-size: clamp(1.7rem, 2.2vw, 2.4rem);
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  max-width: 720px;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.card {
+  border: 1px solid #d9e4ef;
+  border-radius: 16px;
+  background: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(16, 39, 66, 0.08);
+}
+
+.card h2 {
+  margin-bottom: 0.75rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.form input {
+  border: 1px solid #c8d7e6;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.form button,
+.sectionHeader button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  color: #ecf7ff;
+  background: linear-gradient(140deg, #1e5f9d, #2a7f7f);
+}
+
+.ghostButton {
+  margin-top: 1rem;
+  border: 1px solid #cce3f4;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2fbff;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font-weight: 700;
+  color: #ecf7ff;
+  background: linear-gradient(140deg, #1e5f9d, #2a7f7f);
+  width: fit-content;
+  margin-top: 0.75rem;
+}
+
+.form button:disabled,
+.sectionHeader button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.notice {
+  margin-top: 0.8rem;
+  border-left: 4px solid #1e5f9d;
+  background: #e9f4ff;
+  padding: 0.75rem;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  margin-top: 0.75rem;
+  color: #a34717;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  border-bottom: 1px solid #e2ecf5;
+  padding: 0.65rem;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 1.25rem;
+  }
+}

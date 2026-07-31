@@ -8,8 +8,9 @@ class PointsController {
   static async getPoints(req, res, next) {
     try {
       const { customerId } = req.params;
+      const businessId = req.businessId;
 
-      const points = await PointsService.getPoints(customerId);
+      const points = await PointsService.getPoints(businessId, customerId);
 
       res.status(200).json({
         success: true,
@@ -32,6 +33,7 @@ class PointsController {
   static async addPoints(req, res, next) {
     try {
       const { customer_id, amount } = req.body;
+      const businessId = req.businessId;
 
       if (!customer_id || amount === undefined) {
         return res.status(400).json({
@@ -40,7 +42,7 @@ class PointsController {
         });
       }
 
-      const points = await PointsService.addPoints(customer_id, amount);
+      const points = await PointsService.addPoints(businessId, customer_id, amount);
 
       res.status(200).json({
         success: true,
@@ -67,6 +69,7 @@ class PointsController {
   static async redeemPoints(req, res, next) {
     try {
       const { customer_id, amount } = req.body;
+      const businessId = req.businessId;
 
       if (!customer_id || amount === undefined) {
         return res.status(400).json({
@@ -75,7 +78,7 @@ class PointsController {
         });
       }
 
-      const points = await PointsService.redeemPoints(customer_id, amount);
+      const points = await PointsService.redeemPoints(businessId, customer_id, amount);
 
       res.status(200).json({
         success: true,

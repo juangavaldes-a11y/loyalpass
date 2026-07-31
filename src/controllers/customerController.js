@@ -44,8 +44,9 @@ class CustomerController {
   static async getCustomer(req, res, next) {
     try {
       const { id } = req.params;
+      const businessId = req.businessId;
 
-      const customer = await CustomerService.getCustomer(id);
+      const customer = await CustomerService.getCustomer(businessId, id);
 
       res.status(200).json({
         success: true,
@@ -87,8 +88,9 @@ class CustomerController {
   static async updateCustomer(req, res, next) {
     try {
       const { id } = req.params;
+      const businessId = req.businessId;
 
-      const customer = await CustomerService.updateCustomer(id, req.body);
+      const customer = await CustomerService.updateCustomer(businessId, id, req.body);
 
       res.status(200).json({
         success: true,

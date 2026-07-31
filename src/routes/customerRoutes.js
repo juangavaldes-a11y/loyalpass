@@ -1,10 +1,11 @@
 const express = require('express');
 const CustomerController = require('../controllers/customerController');
+const { writeLimiter } = require('../middleware/rateLimitMiddleware');
 
 const router = express.Router();
 
 // Create customer
-router.post('/', CustomerController.createCustomer);
+router.post('/', writeLimiter, CustomerController.createCustomer);
 
 // List customers for business
 router.get('/', CustomerController.listCustomers);
@@ -13,6 +14,6 @@ router.get('/', CustomerController.listCustomers);
 router.get('/:id', CustomerController.getCustomer);
 
 // Update customer
-router.put('/:id', CustomerController.updateCustomer);
+router.put('/:id', writeLimiter, CustomerController.updateCustomer);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const { Pass, Business, Customer, Points } = require('../models');
 const ApplePassService = require('./applePassService');
 const GooglePassService = require('./googlePassService');
+const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 
 class PassService {
@@ -65,6 +66,16 @@ class PassService {
         google_pass_object_id: googlePassObjectId,
       });
 
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'pass.create',
+        entityType: 'pass',
+        entityId: pass.id,
+        metadata: { customerId, applePassSerial, googlePassObjectId },
+      });
+
       logger.info(`Pass created: ${pass.id}`);
 
       return {
@@ -81,10 +92,16 @@ class PassService {
   /**
    * Update pass with points
    */
-  static async updatePass(passId, customerId, newPoints) {
+  static async updatePass(businessId, passId, customerId, newPoints) {
     try {
-      const pass = await Pass.findByPk(passId);
-      if (!pass || pass.customer_id !== customerId) {
+      const pass = await Pass.findOne({
+        where: {
+          id: passId,
+          customer_id: customerId,
+          business_id: businessId,
+        },
+      });
+      if (!pass) {
         throw new Error('Pass not found');
       }
 
@@ -114,6 +131,16 @@ class PassService {
 
       logger.info(`Pass updated: ${passId}`);
 
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'pass.update',
+        entityType: 'pass',
+        entityId: passId,
+        metadata: { customerId, newPoints },
+      });
+
       return pass.toJSON();
     } catch (error) {
       logger.error('Error updating pass:', error);
@@ -124,10 +151,10 @@ class PassService {
   /**
    * Get pass for customer
    */
-  static async getPassByCustomerId(customerId) {
+  static async getPassByCustomerId(businessId, customerId) {
     try {
       const pass = await Pass.findOne({
-        where: { customer_id: customerId },
+        where: { customer_id: customerId, business_id: businessId },
       });
       if (!pass) {
         throw new Error('Pass not found for customer');

@@ -4,10 +4,16 @@ services:
   app:
     build: .
     container_name: loyalpass-app
+    profiles:
+      - backend
+      - full
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
+      AUTH_SESSION_SECRET: change-me-in-production
+      PLATFORM_ADMIN_EMAIL: admin@loyalpass.local
+      PLATFORM_ADMIN_PASSWORD: change-me-in-production
       DB_DIALECT: postgres
       DB_HOST: db
       DB_PORT: 5432
@@ -16,6 +22,12 @@ services:
       DB_NAME: loyalpass_db
       PORT: 3000
       LOG_LEVEL: info
+      RATE_LIMIT_GENERAL_WINDOW_MINUTES: 15
+      RATE_LIMIT_GENERAL_MAX: 500
+      RATE_LIMIT_AUTH_WINDOW_MINUTES: 15
+      RATE_LIMIT_AUTH_MAX: 25
+      RATE_LIMIT_WRITE_WINDOW_MINUTES: 15
+      RATE_LIMIT_WRITE_MAX: 150
     depends_on:
       db:
         condition: service_healthy
@@ -25,9 +37,32 @@ services:
       - loyalpass-network
     restart: unless-stopped
 
+  portal:
+    build: ./loyalpass-portal
+    container_name: loyalpass-portal
+    profiles:
+      - portal
+      - full
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      AUTH_SESSION_SECRET: change-me-in-production
+      LOYALPASS_API_BASE_URL: http://app:3000
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - loyalpass-network
+    restart: unless-stopped
+
   db:
     image: postgres:15-alpine
     container_name: loyalpass-db
+    profiles:
+      - backend
+      - full
     environment:
       POSTGRES_DB: loyalpass_db
       POSTGRES_USER: loyalpass

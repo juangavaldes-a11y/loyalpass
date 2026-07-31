@@ -3,36 +3,43 @@ const config = require('config');
 
 // Merge environment variables with config file settings
 const nodeEnv = process.env.NODE_ENV || 'development';
+const baseDbConfig = config.get('db');
+const baseAppConfig = config.get('app');
+const baseAppleConfig = config.has('apple') ? config.get('apple') : {};
+const baseGoogleConfig = config.has('google') ? config.get('google') : {};
+const baseLoggingConfig = config.get('logging');
 
 const mergedConfig = {
-  ...config.get('.'),
   // Allow environment variables to override config file
   db: {
-    ...config.get('db'),
-    host: process.env.DB_HOST || config.get('db.host'),
-    port: process.env.DB_PORT || config.get('db.port'),
-    database: process.env.DB_NAME || config.get('db.database'),
-    username: process.env.DB_USER || config.get('db.username'),
-    password: process.env.DB_PASSWORD || config.get('db.password'),
-    dialect: process.env.DB_DIALECT || config.get('db.dialect'),
+    ...baseDbConfig,
+    host: process.env.DB_HOST || baseDbConfig.host,
+    port: process.env.DB_PORT || baseDbConfig.port,
+    database: process.env.DB_NAME || baseDbConfig.database,
+    username: process.env.DB_USER || baseDbConfig.username,
+    password: process.env.DB_PASSWORD || baseDbConfig.password,
+    dialect: process.env.DB_DIALECT || baseDbConfig.dialect,
   },
   app: {
-    ...config.get('app'),
-    port: process.env.PORT || config.get('app.port'),
+    ...baseAppConfig,
+    port: process.env.PORT || baseAppConfig.port,
     nodeEnv,
   },
   apple: {
-    teamId: process.env.APPLE_TEAM_ID || config.get('apple.teamId'),
-    keyId: process.env.APPLE_KEY_ID || config.get('apple.keyId'),
-    certificatePath: process.env.APPLE_CERTIFICATE_PATH || config.get('apple.certificatePath'),
+    ...baseAppleConfig,
+    teamId: process.env.APPLE_TEAM_ID || baseAppleConfig.teamId,
+    keyId: process.env.APPLE_KEY_ID || baseAppleConfig.keyId,
+    certificatePath: process.env.APPLE_CERTIFICATE_PATH || baseAppleConfig.certificatePath,
   },
   google: {
-    projectId: process.env.GOOGLE_PROJECT_ID || config.get('google.projectId'),
-    serviceAccountKeyPath: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || config.get('google.serviceAccountKeyPath'),
-    issuerId: process.env.GOOGLE_ISSUER_ID || config.get('google.issuerId'),
+    ...baseGoogleConfig,
+    projectId: process.env.GOOGLE_PROJECT_ID || baseGoogleConfig.projectId,
+    serviceAccountKeyPath: process.env.GOOGLE_SERVICE_ACCOUNT_PATH || baseGoogleConfig.serviceAccountKeyPath,
+    issuerId: process.env.GOOGLE_ISSUER_ID || baseGoogleConfig.issuerId,
   },
   logging: {
-    level: process.env.LOG_LEVEL || config.get('logging.level'),
+    ...baseLoggingConfig,
+    level: process.env.LOG_LEVEL || baseLoggingConfig.level,
   },
 };
 

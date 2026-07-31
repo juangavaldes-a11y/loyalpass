@@ -2,6 +2,7 @@ const app = require('./app');
 const config = require('./config/env');
 const logger = require('./utils/logger');
 const pool = require('./config/db');
+const AuthService = require('./services/authService');
 
 const PORT = config.app.port;
 
@@ -15,16 +16,23 @@ pool.query('SELECT NOW()', (err, res) => {
   }
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Environment: ${config.app.nodeEnv}`);
-});
+const startServer = async () => {
+  await AuthService.seedDefaultPlatformAdmin();
+
+  const server = app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Environment: ${config.app.nodeEnv}`);
+  });
+
+  return server;
+};
+
+let server;
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
   logger.info('SIGTERM received, shutting down gracefully');
-  server.close(() => {
+  server?.close(() => {
     logger.info('Server closed');
     pool.end(() => {
       logger.info('Database pool closed');
@@ -35,7 +43,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   logger.info('SIGINT received, shutting down gracefully');
-  server.close(() => {
+  server?.close(() => {
     logger.info('Server closed');
     pool.end(() => {
       logger.info('Database pool closed');
@@ -43,3 +51,12 @@ process.on('SIGINT', () => {
     });
   });
 });
+
+startServer()
+  .then((runningServer) => {
+    server = runningServer;
+  })
+  .catch((error) => {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  });
