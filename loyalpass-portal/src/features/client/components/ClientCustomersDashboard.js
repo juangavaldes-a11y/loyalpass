@@ -6,6 +6,7 @@ import { useBusinessProfile, useCreateCustomer, useCustomers, useUpdateCustomer 
 import { useQuotaStatus } from '@/features/admin/hooks/useClients';
 import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
+import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -43,21 +44,25 @@ export default function ClientCustomersDashboard() {
     {
       key: 'profile',
       label: 'Complete your business profile',
+      description: 'Add the brand story, colors, and core business details so the portal feels ready for launch.',
       completed: Boolean(businessProfile?.name),
     },
     {
       key: 'customers',
       label: 'Add your first loyalty customer',
+      description: 'Create the first member record so the program has a real audience to engage.',
       completed: customers.length > 0,
     },
     {
       key: 'points',
       label: 'Issue your first points activity',
+      description: 'Reward a member with an initial points transaction to demonstrate the program loop.',
       completed: false,
     },
     {
       key: 'passes',
       label: 'Create your first wallet pass',
+      description: 'Generate a pass so customers can carry membership details into Apple or Google Wallet.',
       completed: Boolean(passQuery.data?.data?.id),
     },
   ];
@@ -167,14 +172,13 @@ export default function ClientCustomersDashboard() {
               <p><strong>Quota:</strong> {quotaStatusQuery.data.data.checks?.customers?.allowed ? 'Within plan limits' : 'Needs attention'} </p>
             ) : null}
           </div>
-          <ul>
-            {onboardingSteps.map((step) => (
-              <li key={step.key} style={{ marginBottom: '0.75rem' }}>
-                <strong>{step.completed ? '✓' : '○'}</strong> {step.label}
-              </li>
-            ))}
-          </ul>
           <p className={styles.status}>Next step: {nextBestAction}</p>
+          <OnboardingChecklist
+            title="Launch checklist"
+            subtitle="A practical journey from profile setup to wallet-ready customer engagement."
+            steps={onboardingSteps}
+            accentLabel="Client flow"
+          />
         </article>
 
         <article className={styles.card}>

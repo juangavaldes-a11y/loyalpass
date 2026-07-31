@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useClientLookup, useCreateClient, useUpdateClient, useUpdateBilling, useUpdateOnboarding, useQuotaStatus } from '@/features/admin/hooks/useClients';
+import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import styles from '@/app/portal.module.css';
 
 function statusFromMutation(mutation) {
@@ -59,6 +60,26 @@ export default function AdminClientsDashboard() {
   const completedOnboarding = businessList.filter((business) => business.onboarding_status === 'completed').length;
   const needsAttention = businessList.filter((business) => business.onboarding_status !== 'completed').length;
   const nextPriority = completedOnboarding === clientCount && clientCount > 0 ? 'Everything is moving smoothly.' : 'Review the next client onboarding step.';
+  const adminOnboardingSteps = [
+    {
+      key: 'create',
+      label: 'Create a new client profile',
+      description: 'Provision the business account and capture the initial branding assets.',
+      completed: clientCount > 0,
+    },
+    {
+      key: 'plan',
+      label: 'Set the client plan and billing state',
+      description: 'Move the client into the right tier and confirm subscription or trial status.',
+      completed: businessList.some((business) => business.plan || business.subscription_status),
+    },
+    {
+      key: 'launch',
+      label: 'Complete onboarding and launch readiness',
+      description: 'Confirm the business has completed its onboarding checklist and is ready for rollout.',
+      completed: completedOnboarding > 0,
+    },
+  ];
 
   const updatePayload = useMemo(() => {
     const payload = {};
@@ -340,6 +361,17 @@ export default function AdminClientsDashboard() {
             </div>
           ) : null}
         </article>
+      </section>
+
+      <section className={styles.grid}>
+        <div className={styles.card}>
+          <OnboardingChecklist
+            title="Admin onboarding playbook"
+            subtitle="Keep every new client moving from setup to launch with a consistent operational checklist."
+            steps={adminOnboardingSteps}
+            accentLabel="Ops view"
+          />
+        </div>
       </section>
 
       <section className={styles.card}>

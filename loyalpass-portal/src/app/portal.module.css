@@ -173,6 +173,60 @@
   background: linear-gradient(90deg, #1e5f9d 0%, #2a7f7f 100%);
 }
 
+.onboardingCard {
+  border: 1px solid #dbe7f2;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f9fcff 0%, #eef7ff 100%);
+  padding: 1rem;
+}
+
+.stepList {
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.stepItem {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  border: 1px solid #dde8f2;
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+  background: #fff;
+}
+
+.stepItemCompleted {
+  border-color: #7dc3b2;
+  background: #f3fcf9;
+}
+
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 999px;
+  background: #1e5f9d;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stepDescription {
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 .mutedText {
   color: var(--text-secondary);
   line-height: 1.5;
