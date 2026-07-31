@@ -1,0 +1,31 @@
+{
+  "createdAt": "2026-07-31T18:49:11.438Z",
+  "schemaVersion": 1,
+  "data": {
+    "businesses": [
+      {
+        "id": "fe3b6a62-73f7-4cea-99b1-3e5dd832cb0b",
+        "name": "Backup Business",
+        "logo_url": null,
+        "brand_color": null,
+        "text_color": null,
+        "plan": "starter",
+        "onboarding_status": "not_started",
+        "trial_ends_at": null,
+        "subscription_status": "trial",
+        "subscription_renews_at": null,
+        "billing_email": null,
+        "quota_overrides": "{}",
+        "pricing_tier": "starter",
+        "createdAt": "2026-07-31 18:49:11.436 +00:00",
+        "updatedAt": "2026-07-31 18:49:11.436 +00:00"
+      }
+    ],
+    "customers": [],
+    "points": [],
+    "passes": [],
+    "apiKeys": [],
+    "auditLogs": [],
+    "portalUsers": []
+  }
+}

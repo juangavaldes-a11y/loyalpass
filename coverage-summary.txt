@@ -1,0 +1,480 @@
+PASS src/__tests__/serviceControllers.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:25.267Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:25.404Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 37fa1dda-9b49-4f65-8f1d-ae133bebe979","timestamp":"2026-07-31T18:32:25.638Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:25.642Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer created: f27f3bf0-8c5a-48a9-b855-fe6f9334a480","timestamp":"2026-07-31T18:32:25.657Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer creation completed","timestamp":"2026-07-31T18:32:25.659Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer created via controller","timestamp":"2026-07-31T18:32:25.659Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Customer lookup failed","timestamp":"2026-07-31T18:32:25.668Z","businessId":"missing-business","customerId":"missing-customer"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.error
+      [ERROR] {"event":"Error getting customer:","timestamp":"2026-07-31T18:32:25.669Z","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at CustomerService.error [as getCustomer] (src/services/customerService.js:58:14)
+      at Object.<anonymous> (src/__tests__/serviceControllers.test.js:53:5)
+
+    console.log
+      [WARN] {"event":"Customer update target not found","timestamp":"2026-07-31T18:32:25.671Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"missing-customer"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.error
+      [ERROR] {"event":"Error updating customer:","timestamp":"2026-07-31T18:32:25.671Z","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at CustomerService.error [as updateCustomer] (src/services/customerService.js:108:14)
+      at Object.<anonymous> (src/__tests__/serviceControllers.test.js:54:5)
+
+    console.error
+      [ERROR] {"event":"Error creating customer:","timestamp":"2026-07-31T18:32:25.673Z","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at CustomerService.error [as createCustomer] (src/services/customerService.js:35:14)
+      at Object.<anonymous> (src/__tests__/serviceControllers.test.js:55:5)
+
+    console.log
+      [INFO] {"event":"Points added successfully","timestamp":"2026-07-31T18:32:25.686Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480","amount":10,"newBalance":10}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Points redeemed successfully","timestamp":"2026-07-31T18:32:25.697Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480","amount":3,"newBalance":7}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Apple Wallet credentials not configured. Skipping Apple Pass generation.","timestamp":"2026-07-31T18:32:25.715Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Google Wallet credentials not configured. Skipping Pass Object creation.","timestamp":"2026-07-31T18:32:25.717Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Pass created successfully","timestamp":"2026-07-31T18:32:25.721Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480","passId":"64b43813-e8e0-4da2-824d-ab8b9da2e498","applePassSerial":null,"googlePassObjectId":null}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Pass updated successfully","timestamp":"2026-07-31T18:32:25.727Z","businessId":"37fa1dda-9b49-4f65-8f1d-ae133bebe979","customerId":"f27f3bf0-8c5a-48a9-b855-fe6f9334a480","passId":"64b43813-e8e0-4da2-824d-ab8b9da2e498","newPoints":null}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business onboarding updated: 37fa1dda-9b49-4f65-8f1d-ae133bebe979","timestamp":"2026-07-31T18:32:25.744Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business billing updated: 37fa1dda-9b49-4f65-8f1d-ae133bebe979","timestamp":"2026-07-31T18:32:25.751Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"API key created for business: 37fa1dda-9b49-4f65-8f1d-ae133bebe979","timestamp":"2026-07-31T18:32:25.766Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer created: cust-helper","timestamp":"2026-07-31T18:32:25.778Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/auditLogs.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:26.089Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:26.207Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 6efafb90-457f-47e4-bf0a-5cd13e08d9e0","timestamp":"2026-07-31T18:32:26.408Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:26.409Z","businessId":"6efafb90-457f-47e4-bf0a-5cd13e08d9e0","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 98424682-52b4-4994-9cdf-fb1c8f6dc7ef","timestamp":"2026-07-31T18:32:26.501Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:26.502Z","businessId":"98424682-52b4-4994-9cdf-fb1c8f6dc7ef","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/monitoringSupport.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:26.869Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:26.981Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 184daad4-0853-4bb5-9e89-deae80d05701","timestamp":"2026-07-31T18:32:27.207Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:27.207Z","businessId":"184daad4-0853-4bb5-9e89-deae80d05701","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/tenantIsolation.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:27.495Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:27.612Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 374ec7f6-a6b1-4e5a-82b9-2362fecf2fe9","timestamp":"2026-07-31T18:32:27.806Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:27.806Z","businessId":"374ec7f6-a6b1-4e5a-82b9-2362fecf2fe9","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer created: bafc8e22-eb73-4bac-adb4-b7b6fcd0ed66","timestamp":"2026-07-31T18:32:27.825Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer creation completed","timestamp":"2026-07-31T18:32:27.825Z","businessId":"374ec7f6-a6b1-4e5a-82b9-2362fecf2fe9","customerId":"bafc8e22-eb73-4bac-adb4-b7b6fcd0ed66"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Customer created via controller","timestamp":"2026-07-31T18:32:27.825Z","businessId":"374ec7f6-a6b1-4e5a-82b9-2362fecf2fe9","customerId":"bafc8e22-eb73-4bac-adb4-b7b6fcd0ed66","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Customer lookup failed","timestamp":"2026-07-31T18:32:27.833Z","businessId":"ecc86f7b-00f9-4959-9a6b-3adfe879b9eb","customerId":"b7fe3667-bbc5-4d5b-8d02-20ebdaab4468"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.error
+      [ERROR] {"event":"Error getting customer:","timestamp":"2026-07-31T18:32:27.833Z","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at CustomerService.error [as getCustomer] (src/services/customerService.js:58:14)
+      at getCustomer (src/controllers/customerController.js:57:24)
+
+    console.error
+      [ERROR] {"event":"Customer controller fetch flow failed","timestamp":"2026-07-31T18:32:27.833Z","businessId":"ecc86f7b-00f9-4959-9a6b-3adfe879b9eb","customerId":"b7fe3667-bbc5-4d5b-8d02-20ebdaab4468","path":"/b7fe3667-bbc5-4d5b-8d02-20ebdaab4468","method":"GET","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at error (src/controllers/customerController.js:67:14)
+
+PASS src/__tests__/exportWorkflow.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:28.092Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:28.210Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: 524868b2-c9cb-4ad0-8fef-c74efdd5f741","timestamp":"2026-07-31T18:32:28.409Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created via controller","timestamp":"2026-07-31T18:32:28.410Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","path":"/","method":"POST"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business export payload assembled","timestamp":"2026-07-31T18:32:28.419Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","customerCount":0,"pointCount":0,"passCount":0,"format":"json"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business export requested","timestamp":"2026-07-31T18:32:28.421Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","format":"json","path":"/524868b2-c9cb-4ad0-8fef-c74efdd5f741/export","method":"GET"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business export payload assembled","timestamp":"2026-07-31T18:32:28.427Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","customerCount":0,"pointCount":0,"passCount":0,"format":"csv"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business export requested","timestamp":"2026-07-31T18:32:28.427Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","format":"csv","path":"/524868b2-c9cb-4ad0-8fef-c74efdd5f741/export","method":"GET"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Business data deletion completed","timestamp":"2026-07-31T18:32:28.435Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","deletedCustomerCount":0}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Business data deletion requested","timestamp":"2026-07-31T18:32:28.436Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","path":"/524868b2-c9cb-4ad0-8fef-c74efdd5f741/export","method":"DELETE"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business export payload assembled","timestamp":"2026-07-31T18:32:28.440Z","businessId":"524868b2-c9cb-4ad0-8fef-c74efdd5f741","customerCount":0,"pointCount":0,"passCount":0,"format":"json"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/auth.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:28.679Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:28.790Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/rateLimit.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:29.129Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Seeded platform admin user: admin@loyalpass.local","timestamp":"2026-07-31T18:32:29.257Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/serviceCoverage.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:29.508Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Business created: e22ec756-ca88-493e-8ad6-f5c8fd24b8ae","timestamp":"2026-07-31T18:32:29.622Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"API key rotated for business: e22ec756-ca88-493e-8ad6-f5c8fd24b8ae","timestamp":"2026-07-31T18:32:29.627Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Apple Wallet credentials not configured. Skipping Apple Pass generation.","timestamp":"2026-07-31T18:32:29.628Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Apple Pass updated: serial-1 - Points: 7","timestamp":"2026-07-31T18:32:29.629Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Google Wallet credentials not configured. Skipping Pass Class creation.","timestamp":"2026-07-31T18:32:29.629Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Google Wallet credentials not configured. Skipping Pass Object creation.","timestamp":"2026-07-31T18:32:29.629Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [WARN] {"event":"Google configuration incomplete for pass update","timestamp":"2026-07-31T18:32:29.630Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.error
+      [ERROR] {"event":"Error generating JWT:","timestamp":"2026-07-31T18:32:29.630Z","error":{}}
+
+    [0m [90m 46 |[39m
+     [90m 47 |[39m   [36mif[39m (level [33m===[39m [32m'error'[39m) {
+    [31m[1m>[22m[39m[90m 48 |[39m     console[33m.[39merror([32m`[${level.toUpperCase()}] ${serialized}`[39m)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 49 |[39m     [36mreturn[39m[33m;[39m
+     [90m 50 |[39m   }
+     [90m 51 |[39m[0m
+
+      at error (src/utils/logger.js:48:13)
+      at Object.writeLog [as error] (src/utils/logger.js:63:5)
+      at GooglePassService.error [as generateAddToWalletJwt] (src/services/googlePassService.js:200:14)
+      at generateAddToWalletJwt (src/__tests__/serviceCoverage.test.js:44:36)
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.toThrow (src/__tests__/serviceCoverage.test.js:44:72)
+
+PASS src/__tests__/auditRetention.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:29.788Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Audit logs pruned","timestamp":"2026-07-31T18:32:29.818Z","retainedDays":30,"deletedCount":1}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/backupRestore.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"Database connected successfully (sqlite)","timestamp":"2026-07-31T18:32:29.973Z"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Backup created","timestamp":"2026-07-31T18:32:30.016Z","filePath":"C:\\Users\\juang\\Workspace\\loyalpass\\tmp-backups\\loyalpass-backup-2026-07-31T18-32-30-009Z.json"}
+
+      at log (src/utils/logger.js:52:11)
+
+    console.log
+      [INFO] {"event":"Backup restored","timestamp":"2026-07-31T18:32:30.022Z","inputPath":"C:\\Users\\juang\\Workspace\\loyalpass\\tmp-backups\\loyalpass-backup-2026-07-31T18-32-30-009Z.json"}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/webhookSigning.test.js
+  ● Console
+
+    console.log
+      [INFO] {"event":"points.updated","timestamp":"2026-07-31T18:32:30.080Z","url":"http://127.0.0.1:56840","status":200}
+
+      at log (src/utils/logger.js:52:11)
+
+PASS src/__tests__/helpers.test.js
+PASS src/__tests__/loggingConfig.test.js
+PASS src/__tests__/businessOnboarding.test.js
+PASS src/__tests__/envConfig.test.js
+PASS src/__tests__/businessBilling.test.js
+PASS src/__tests__/billingQuotas.test.js
+
+=============================== Coverage summary ===============================
+Statements   : 66.98% ( 836/1248 )
+Branches     : 49.89% ( 243/487 )
+Functions    : 72.72% ( 96/132 )
+Lines        : 67.57% ( 821/1215 )
+================================================================================
+
+Test Suites: 17 passed, 17 total
+Tests:       36 passed, 36 total
+Snapshots:   0 total
+Time:        6.601 s, estimated 7 s
+Ran all test suites.

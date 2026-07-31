@@ -1,0 +1,212 @@
+{
+  "createdAt": "2026-07-31T19:01:00.169Z",
+  "schemaVersion": 1,
+  "data": {
+    "businesses": [
+      {
+        "id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "name": "Coverage Co Updated",
+        "logo_url": "https://img.test/logo.png",
+        "brand_color": "#112233",
+        "text_color": "#ffffff",
+        "plan": "growth",
+        "onboarding_status": "completed",
+        "trial_ends_at": null,
+        "subscription_status": "active",
+        "subscription_renews_at": null,
+        "billing_email": null,
+        "quota_overrides": "{}",
+        "pricing_tier": "starter",
+        "createdAt": "2026-07-31 19:00:59.791 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.945 +00:00"
+      },
+      {
+        "id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "name": "Controller Business Updated",
+        "logo_url": null,
+        "brand_color": null,
+        "text_color": null,
+        "plan": "starter",
+        "onboarding_status": "not_started",
+        "trial_ends_at": null,
+        "subscription_status": "trial",
+        "subscription_renews_at": null,
+        "billing_email": null,
+        "quota_overrides": "{}",
+        "pricing_tier": "starter",
+        "createdAt": "2026-07-31 19:00:59.971 +00:00",
+        "updatedAt": "2026-07-31 19:01:00.114 +00:00"
+      }
+    ],
+    "customers": [],
+    "points": [],
+    "passes": [],
+    "apiKeys": [
+      {
+        "id": "1cd205c7-e01e-41bf-acb0-7bc7cf9e2419",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "key": "3b60d263e9bf2345acef2c4911393a7489b29809a0c317baae5dae249a0a9921",
+        "active": 0,
+        "createdAt": "2026-07-31 19:00:59.797 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.953 +00:00"
+      },
+      {
+        "id": "f818c669-5959-4e94-814f-d1227145c845",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "key": "513734363e1d2fae2e5d280d657202b7d96eaf528123e04b28591de25277a329",
+        "active": 0,
+        "createdAt": "2026-07-31 19:00:59.951 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.953 +00:00"
+      },
+      {
+        "id": "cd8124f8-ab01-47de-be9b-65c503d394af",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "key": "9b7cc17f7a4c1f93db9447d67efae06b619046c7abd9b4739d04c10bd94f633b",
+        "active": 1,
+        "createdAt": "2026-07-31 19:00:59.955 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.955 +00:00"
+      },
+      {
+        "id": "0968dbcc-f53d-41f3-bfdb-174699b406b7",
+        "business_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "key": "e97dc74d765a2e77f3f1198611eeb3c8f362a4025b4aa7fa5627250cbd8ef9c8",
+        "active": 1,
+        "createdAt": "2026-07-31 19:00:59.977 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.977 +00:00"
+      }
+    ],
+    "auditLogs": [
+      {
+        "id": "2e1b7dae-d090-4b67-a288-fe1536a2272c",
+        "business_id": null,
+        "actor_type": "user",
+        "actor_id": "c913a669-9b35-43e8-8b17-46f944b8edef",
+        "action": "auth.login",
+        "entity_type": "portal_user",
+        "entity_id": "c913a669-9b35-43e8-8b17-46f944b8edef",
+        "metadata": "{\"role\":\"platform_admin\"}",
+        "createdAt": "2026-07-31 19:00:59.776 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.776 +00:00"
+      },
+      {
+        "id": "80262423-981e-4714-b99d-02e6a6f36840",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "actor_type": "system",
+        "actor_id": "system",
+        "action": "business.create",
+        "entity_type": "business",
+        "entity_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "metadata": "{\"name\":\"Coverage Co\",\"ownerEmail\":\"coverage.co.fb790150@loyalpass.local\"}",
+        "createdAt": "2026-07-31 19:00:59.915 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.915 +00:00"
+      },
+      {
+        "id": "0ef577fc-c12b-4f3d-89ff-8258b91dc491",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "actor_type": "user",
+        "actor_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "action": "business.update",
+        "entity_type": "business",
+        "entity_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "metadata": "{\"name\":\"Coverage Co Updated\"}",
+        "createdAt": "2026-07-31 19:00:59.933 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.933 +00:00"
+      },
+      {
+        "id": "373b449b-cd3e-47cc-887e-9b4edd5fdade",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "actor_type": "user",
+        "actor_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "action": "business.onboarding.update",
+        "entity_type": "business",
+        "entity_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "metadata": "{\"plan\":\"growth\",\"onboarding_status\":\"completed\"}",
+        "createdAt": "2026-07-31 19:00:59.939 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.939 +00:00"
+      },
+      {
+        "id": "8db77daa-8c50-4d61-965b-69e936c3d64f",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "actor_type": "user",
+        "actor_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "action": "business.billing.update",
+        "entity_type": "business",
+        "entity_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "metadata": "{\"subscription_status\":\"active\"}",
+        "createdAt": "2026-07-31 19:00:59.946 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.946 +00:00"
+      },
+      {
+        "id": "9e2c2115-f499-4429-8a0f-1dec32e19442",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "actor_type": "user",
+        "actor_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "action": "api_key.rotate",
+        "entity_type": "api_key",
+        "entity_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "metadata": null,
+        "createdAt": "2026-07-31 19:00:59.956 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.956 +00:00"
+      },
+      {
+        "id": "7ee14d7f-03d9-405a-9e51-45039aec1b19",
+        "business_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "actor_type": "system",
+        "actor_id": "system",
+        "action": "business.create",
+        "entity_type": "business",
+        "entity_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "metadata": "{\"name\":\"Controller Business\",\"ownerEmail\":\"controller.business.b9bf9e1b@loyalpass.local\"}",
+        "createdAt": "2026-07-31 19:01:00.088 +00:00",
+        "updatedAt": "2026-07-31 19:01:00.088 +00:00"
+      },
+      {
+        "id": "d196f110-bae1-433b-8558-a80174dfcdfb",
+        "business_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "actor_type": "user",
+        "actor_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "action": "business.update",
+        "entity_type": "business",
+        "entity_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "metadata": "{\"name\":\"Controller Business Updated\"}",
+        "createdAt": "2026-07-31 19:01:00.115 +00:00",
+        "updatedAt": "2026-07-31 19:01:00.115 +00:00"
+      }
+    ],
+    "portalUsers": [
+      {
+        "id": "c913a669-9b35-43e8-8b17-46f944b8edef",
+        "email": "admin@loyalpass.local",
+        "password_hash": "$2a$10$oNN/WeSkZwXW4tETcJksU.eKl28zSuoQ1DzS1jApKfH.raEUzsOGS",
+        "role": "platform_admin",
+        "business_id": null,
+        "api_key": null,
+        "active": 1,
+        "createdAt": "2026-07-31 19:00:59.613 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.613 +00:00"
+      },
+      {
+        "id": "55f561aa-4ee3-431b-85e6-2ed48e49bffb",
+        "email": "coverage.co.fb790150@loyalpass.local",
+        "password_hash": "$2a$10$KfQk9BsIQeTHDcV7X2gAdOX0zDqyTkoCOLsRppxZKEkadMfRmowVu",
+        "role": "client_owner",
+        "business_id": "fb790150-0080-4964-8a9c-6cf5b0d63dea",
+        "api_key": "3b60d263e9bf2345acef2c4911393a7489b29809a0c317baae5dae249a0a9921",
+        "active": 1,
+        "createdAt": "2026-07-31 19:00:59.912 +00:00",
+        "updatedAt": "2026-07-31 19:00:59.912 +00:00"
+      },
+      {
+        "id": "22e85d25-3e55-4e0f-804e-4dedbaf203c5",
+        "email": "controller.business.b9bf9e1b@loyalpass.local",
+        "password_hash": "$2a$10$s8MNLMPblZz8.KE31mc7D.aQhL0dRL74oxI2fXlQidrssOdddI0WW",
+        "role": "client_owner",
+        "business_id": "b9bf9e1b-ac76-4b76-ab0b-16bd67bbb3c5",
+        "api_key": "e97dc74d765a2e77f3f1198611eeb3c8f362a4025b4aa7fa5627250cbd8ef9c8",
+        "active": 1,
+        "createdAt": "2026-07-31 19:01:00.086 +00:00",
+        "updatedAt": "2026-07-31 19:01:00.086 +00:00"
+      }
+    ]
+  }
+}
