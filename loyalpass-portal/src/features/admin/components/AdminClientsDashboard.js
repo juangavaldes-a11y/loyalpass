@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useClientLookup, useCreateClient, useUpdateClient, useUpdateOnboarding } from '@/features/admin/hooks/useClients';
+import { useClientLookup, useCreateClient, useUpdateClient, useUpdateBilling, useUpdateOnboarding, useQuotaStatus } from '@/features/admin/hooks/useClients';
 import styles from '@/app/portal.module.css';
 
 function statusFromMutation(mutation) {
@@ -38,11 +38,20 @@ export default function AdminClientsDashboard() {
     trialEndsAt: '',
   });
 
+  const [billingForm, setBillingForm] = useState({
+    subscriptionStatus: 'trial',
+    subscriptionRenewsAt: '',
+    billingEmail: '',
+    quotaOverrides: '',
+  });
+
   const createClientMutation = useCreateClient();
   const updateClientMutation = useUpdateClient();
   const updateOnboardingMutation = useUpdateOnboarding();
+  const updateBillingMutation = useUpdateBilling();
   const businessListQuery = useClientLookup({});
   const clientLookup = useClientLookup({ businessId: lookup.businessId });
+  const quotaStatusQuery = useQuotaStatus(lookup.businessId);
 
   const lookupData = clientLookup.data?.data || null;
   const businessList = businessListQuery.data?.data || [];
@@ -85,6 +94,24 @@ export default function AdminClientsDashboard() {
         onboardingStatus: onboardingForm.onboardingStatus,
         plan: onboardingForm.plan,
         trialEndsAt: onboardingForm.trialEndsAt || undefined,
+      },
+    });
+  }
+
+  function handleBilling(event) {
+    event.preventDefault();
+
+    const quotaOverrides = billingForm.quotaOverrides
+      ? JSON.parse(billingForm.quotaOverrides)
+      : {};
+
+    updateBillingMutation.mutate({
+      businessId: lookup.businessId,
+      payload: {
+        subscriptionStatus: billingForm.subscriptionStatus,
+        subscriptionRenewsAt: billingForm.subscriptionRenewsAt || undefined,
+        billingEmail: billingForm.billingEmail || undefined,
+        quotaOverrides,
       },
     });
   }
@@ -240,6 +267,52 @@ export default function AdminClientsDashboard() {
 
           {statusFromMutation(updateOnboardingMutation) ? (
             <p className={styles.status}>{statusFromMutation(updateOnboardingMutation)}</p>
+          ) : null}
+        </article>
+
+        <article className={styles.card}>
+          <h2>Billing & Quotas</h2>
+          <form onSubmit={handleBilling} className={styles.form}>
+            <select
+              value={billingForm.subscriptionStatus}
+              onChange={(event) => setBillingForm((prev) => ({ ...prev, subscriptionStatus: event.target.value }))}
+            >
+              <option value="trial">Trial</option>
+              <option value="active">Active</option>
+              <option value="past_due">Past Due</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <input
+              type="date"
+              value={billingForm.subscriptionRenewsAt}
+              onChange={(event) => setBillingForm((prev) => ({ ...prev, subscriptionRenewsAt: event.target.value }))}
+            />
+            <input
+              type="email"
+              placeholder="Billing email"
+              value={billingForm.billingEmail}
+              onChange={(event) => setBillingForm((prev) => ({ ...prev, billingEmail: event.target.value }))}
+            />
+            <input
+              placeholder='Quota overrides JSON, e.g. {"customers":250}'
+              value={billingForm.quotaOverrides}
+              onChange={(event) => setBillingForm((prev) => ({ ...prev, quotaOverrides: event.target.value }))}
+            />
+            <button type="submit" disabled={updateBillingMutation.isPending || !lookup.businessId}>
+              Save billing
+            </button>
+          </form>
+
+          {statusFromMutation(updateBillingMutation) ? (
+            <p className={styles.status}>{statusFromMutation(updateBillingMutation)}</p>
+          ) : null}
+
+          {quotaStatusQuery.data?.data ? (
+            <div className={styles.notice}>
+              <p><strong>Plan:</strong> {quotaStatusQuery.data.data.plan}</p>
+              <p><strong>Customers:</strong> {quotaStatusQuery.data.data.checks?.customers?.currentUsage || 0}/{quotaStatusQuery.data.data.quotas?.customers || 0}</p>
+              <p><strong>Passes:</strong> {quotaStatusQuery.data.data.checks?.passes?.currentUsage || 0}/{quotaStatusQuery.data.data.quotas?.passes || 0}</p>
+            </div>
           ) : null}
         </article>
       </section>

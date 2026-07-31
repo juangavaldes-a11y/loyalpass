@@ -27,3 +27,18 @@ export async function updateOnboarding({ businessId, payload }) {
   });
   return response.data;
 }
+
+export async function updateBilling({ businessId, payload }) {
+  const response = await portalApi.post('/admin/clients/billing', {
+    businessId,
+    payload,
+  });
+  return response.data;
+}
+
+export async function getQuotaStatus({ businessId }) {
+  const response = await portalApi.get('/admin/clients/quota-status', {
+    params: businessId ? { businessId } : {},
+  });
+  return response.data;
+}

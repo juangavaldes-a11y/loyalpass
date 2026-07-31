@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { backendRequest } from '@/lib/api/backend';
 import { toApiError } from '@/lib/api/errors';
@@ -18,13 +17,13 @@ async function getAdminSession() {
   return session;
 }
 
-export async function POST(request) {
+export async function GET(request) {
   try {
     const session = await getAdminSession();
-    const payload = await request.json();
-    const { businessId, payload: onboardingPayload } = payload;
+    const { searchParams } = new URL(request.url);
+    const businessId = searchParams.get('businessId');
 
-    const { error } = validateRequiredBusinessId(payload);
+    const { error } = validateRequiredBusinessId({ businessId });
     if (error) {
       return NextResponse.json(
         {
@@ -35,16 +34,11 @@ export async function POST(request) {
       );
     }
 
-    const data = await backendRequest(`/api/businesses/${businessId}/onboarding`, {
-      method: 'POST',
-      body: onboardingPayload || {},
+    const data = await backendRequest(`/api/businesses/${businessId}/quota-status`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
     });
-
-    revalidateTag(`business:${businessId}`);
-    revalidateTag('admin:clients');
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {

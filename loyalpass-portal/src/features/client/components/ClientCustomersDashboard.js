@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBusinessProfile, useCreateCustomer, useCustomers, useUpdateCustomer } from '@/features/client/hooks/useCustomers';
+import { useQuotaStatus } from '@/features/admin/hooks/useClients';
 import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
 import styles from '@/app/portal.module.css';
@@ -23,6 +24,8 @@ export default function ClientCustomersDashboard() {
 
   const businessProfileQuery = useBusinessProfile();
   const customersQuery = useCustomers();
+  const businessId = businessProfileQuery.data?.data?.id;
+  const quotaStatusQuery = useQuotaStatus(businessId);
   const createMutation = useCreateCustomer();
   const updateMutation = useUpdateCustomer();
   const addPointsMutation = useAddPoints();
@@ -133,6 +136,10 @@ export default function ClientCustomersDashboard() {
             <p><strong>Status:</strong> {onboardingStatusLabel}</p>
             <p><strong>Plan:</strong> {businessProfile?.plan || 'starter'}</p>
             <p><strong>Progress:</strong> {progressPercent}% complete</p>
+            <p><strong>Billing:</strong> {businessProfile?.subscription_status || 'trial'}</p>
+            {quotaStatusQuery.data?.data ? (
+              <p><strong>Quota:</strong> {quotaStatusQuery.data.data.checks?.customers?.allowed ? 'Within plan limits' : 'Needs attention'} </p>
+            ) : null}
           </div>
           <ul>
             {onboardingSteps.map((step) => (

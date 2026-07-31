@@ -137,6 +137,54 @@ class BusinessController {
   }
 
   /**
+   * POST /api/businesses/:id/billing
+   */
+  static async updateBilling(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return sendError(res, 403, error.message);
+      }
+
+      const business = await BusinessService.updateBilling(id, req.body);
+
+      return sendSuccess(res, 200, { data: business });
+    } catch (error) {
+      if (error.message === 'Business not found') {
+        return sendError(res, 404, error.message);
+      }
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/businesses/:id/quota-status
+   */
+  static async getQuotaStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      try {
+        assertBusinessAccess(req, id);
+      } catch (error) {
+        return sendError(res, 403, error.message);
+      }
+
+      const status = await BusinessService.getQuotaStatus(id, req.query);
+
+      return sendSuccess(res, 200, { data: status });
+    } catch (error) {
+      if (error.message === 'Business not found') {
+        return sendError(res, 404, error.message);
+      }
+      next(error);
+    }
+  }
+
+  /**
    * GET /api/businesses/:id/api-keys
    */
   static async getApiKeys(req, res, next) {

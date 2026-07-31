@@ -12,6 +12,14 @@ function mapBusinessUpdates(updates = {}) {
   if (updates.onboarding_status) mappedUpdates.onboarding_status = updates.onboarding_status;
   if (updates.trialEndsAt) mappedUpdates.trial_ends_at = updates.trialEndsAt;
   if (updates.trial_ends_at) mappedUpdates.trial_ends_at = updates.trial_ends_at;
+  if (updates.subscriptionStatus) mappedUpdates.subscription_status = updates.subscriptionStatus;
+  if (updates.subscription_status) mappedUpdates.subscription_status = updates.subscription_status;
+  if (updates.subscriptionRenewsAt) mappedUpdates.subscription_renews_at = updates.subscriptionRenewsAt;
+  if (updates.subscription_renews_at) mappedUpdates.subscription_renews_at = updates.subscription_renews_at;
+  if (updates.billingEmail) mappedUpdates.billing_email = updates.billingEmail;
+  if (updates.billing_email) mappedUpdates.billing_email = updates.billing_email;
+  if (updates.quotaOverrides) mappedUpdates.quota_overrides = updates.quotaOverrides;
+  if (updates.quota_overrides) mappedUpdates.quota_overrides = updates.quota_overrides;
   return mappedUpdates;
 }
 

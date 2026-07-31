@@ -22,7 +22,7 @@ export async function POST(request) {
   try {
     const session = await getAdminSession();
     const payload = await request.json();
-    const { businessId, payload: onboardingPayload } = payload;
+    const { businessId, payload: billingPayload } = payload;
 
     const { error } = validateRequiredBusinessId(payload);
     if (error) {
@@ -35,9 +35,9 @@ export async function POST(request) {
       );
     }
 
-    const data = await backendRequest(`/api/businesses/${businessId}/onboarding`, {
+    const data = await backendRequest(`/api/businesses/${businessId}/billing`, {
       method: 'POST',
-      body: onboardingPayload || {},
+      body: billingPayload || {},
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },

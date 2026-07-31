@@ -39,6 +39,24 @@ const Business = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    subscription_status: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'trial',
+    },
+    subscription_renews_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    billing_email: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    quota_overrides: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: {},
+    },
   },
   {
     timestamps: true,

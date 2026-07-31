@@ -18,6 +18,8 @@ router.get('/:id', BusinessController.getBusiness);
 // Update business
 router.put('/:id', writeLimiter, BusinessController.updateBusiness);
 router.post('/:id/onboarding', writeLimiter, BusinessController.updateOnboarding);
+router.post('/:id/billing', writeLimiter, BusinessController.updateBilling);
+router.get('/:id/quota-status', BusinessController.getQuotaStatus);
 
 // API Key management
 router.get('/:id/api-keys', BusinessController.getApiKeys);

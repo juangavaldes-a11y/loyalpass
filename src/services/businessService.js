@@ -3,6 +3,7 @@ const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 const { mapBusinessUpdates } = require('../utils/fieldMapping');
 const { createBusinessOwnerContext, rotateBusinessApiKey } = require('./businessLifecycleService');
+const { getPlanLimits, evaluateQuotaUsage } = require('../utils/planLimits');
 
 class BusinessService {
   /**
@@ -109,6 +110,69 @@ class BusinessService {
       return business.toJSON();
     } catch (error) {
       logger.error('Error updating onboarding:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update billing state and subscription info
+   */
+  static async updateBilling(businessId, payload = {}) {
+    try {
+      const business = await Business.findByPk(businessId);
+      if (!business) {
+        throw new Error('Business not found');
+      }
+
+      const mappedUpdates = mapBusinessUpdates(payload);
+      await business.update(mappedUpdates);
+
+      await AuditService.log({
+        businessId,
+        actorType: 'user',
+        actorId: businessId,
+        action: 'business.billing.update',
+        entityType: 'business',
+        entityId: businessId,
+        metadata: mappedUpdates,
+      });
+
+      logger.info(`Business billing updated: ${businessId}`);
+      return business.toJSON();
+    } catch (error) {
+      logger.error('Error updating billing:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get quota plan and usage evaluation for a business
+   */
+  static async getQuotaStatus(businessId, usage = {}) {
+    try {
+      const business = await Business.findByPk(businessId);
+      if (!business) {
+        throw new Error('Business not found');
+      }
+
+      const plan = business.plan || 'starter';
+      const quotas = {
+        ...getPlanLimits(plan),
+        ...(business.quota_overrides || {}),
+      };
+
+      return {
+        businessId,
+        plan,
+        quotas,
+        usage,
+        checks: Object.keys(quotas).reduce((acc, metric) => {
+          acc[metric] = evaluateQuotaUsage({ plan, usage, quotas }, metric);
+          return acc;
+        }, {}),
+      };
+    } catch (error) {
+      logger.error('Error checking quota status:', error);
       throw error;
     }
   }
