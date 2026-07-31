@@ -1,5 +1,5 @@
 const PassService = require('../services/passService');
-const logger = require('../utils/logger');
+const { sendSuccess, sendError } = require('../utils/httpResponses');
 
 class PassController {
   /**
@@ -11,27 +11,18 @@ class PassController {
       const businessId = req.businessId;
 
       if (!customer_id) {
-        return res.status(400).json({
-          success: false,
-          message: 'Customer ID is required',
-        });
+        return sendError(res, 400, 'Customer ID is required');
       }
 
       const result = await PassService.createPass(businessId, customer_id);
 
-      res.status(201).json({
-        success: true,
-        data: result,
-      });
+      return sendSuccess(res, 201, { data: result });
     } catch (error) {
       if (
         error.message.includes('not found') ||
         error.message.includes('does not belong')
       ) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -46,24 +37,15 @@ class PassController {
       const businessId = req.businessId;
 
       if (!pass_id || !customer_id) {
-        return res.status(400).json({
-          success: false,
-          message: 'Pass ID and Customer ID are required',
-        });
+        return sendError(res, 400, 'Pass ID and Customer ID are required');
       }
 
       const pass = await PassService.updatePass(businessId, pass_id, customer_id, null);
 
-      res.status(200).json({
-        success: true,
-        data: pass,
-      });
+      return sendSuccess(res, 200, { data: pass });
     } catch (error) {
       if (error.message === 'Pass not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -79,16 +61,10 @@ class PassController {
 
       const pass = await PassService.getPassByCustomerId(businessId, customerId);
 
-      res.status(200).json({
-        success: true,
-        data: pass,
-      });
+      return sendSuccess(res, 200, { data: pass });
     } catch (error) {
       if (error.message.includes('not found')) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }

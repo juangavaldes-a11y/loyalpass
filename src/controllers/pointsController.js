@@ -1,5 +1,5 @@
 const PointsService = require('../services/pointsService');
-const logger = require('../utils/logger');
+const { sendSuccess, sendError } = require('../utils/httpResponses');
 
 class PointsController {
   /**
@@ -12,16 +12,10 @@ class PointsController {
 
       const points = await PointsService.getPoints(businessId, customerId);
 
-      res.status(200).json({
-        success: true,
-        data: points,
-      });
+      return sendSuccess(res, 200, { data: points });
     } catch (error) {
       if (error.message === 'Points not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -36,16 +30,12 @@ class PointsController {
       const businessId = req.businessId;
 
       if (!customer_id || amount === undefined) {
-        return res.status(400).json({
-          success: false,
-          message: 'Customer ID and amount are required',
-        });
+        return sendError(res, 400, 'Customer ID and amount are required');
       }
 
       const points = await PointsService.addPoints(businessId, customer_id, amount);
 
-      res.status(200).json({
-        success: true,
+      return sendSuccess(res, 200, {
         data: points,
         message: `${amount} points added successfully`,
       });
@@ -54,10 +44,7 @@ class PointsController {
         error.message.includes('must be greater than') ||
         error.message.includes('not found')
       ) {
-        return res.status(400).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 400, error.message);
       }
       next(error);
     }
@@ -72,16 +59,12 @@ class PointsController {
       const businessId = req.businessId;
 
       if (!customer_id || amount === undefined) {
-        return res.status(400).json({
-          success: false,
-          message: 'Customer ID and amount are required',
-        });
+        return sendError(res, 400, 'Customer ID and amount are required');
       }
 
       const points = await PointsService.redeemPoints(businessId, customer_id, amount);
 
-      res.status(200).json({
-        success: true,
+      return sendSuccess(res, 200, {
         data: points,
         message: `${amount} points redeemed successfully`,
       });
@@ -89,10 +72,7 @@ class PointsController {
       const statusCode = error.message.includes('Insufficient')
         ? 409
         : 400;
-      return res.status(statusCode).json({
-        success: false,
-        message: error.message,
-      });
+      return sendError(res, statusCode, error.message);
     }
   }
 }

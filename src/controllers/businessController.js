@@ -1,6 +1,6 @@
 const BusinessService = require('../services/businessService');
-const logger = require('../utils/logger');
 const { assertPlatformAdmin, assertBusinessAccess } = require('../utils/tenantAccess');
+const { sendSuccess, sendError } = require('../utils/httpResponses');
 
 class BusinessController {
   /**
@@ -20,10 +20,7 @@ class BusinessController {
       const { name, logo_url, brand_color, text_color } = req.body;
 
       if (!name) {
-        return res.status(400).json({
-          success: false,
-          message: 'Business name is required',
-        });
+        return sendError(res, 400, 'Business name is required');
       }
 
       const result = await BusinessService.createBusiness(
@@ -33,10 +30,7 @@ class BusinessController {
         text_color
       );
 
-      res.status(201).json({
-        success: true,
-        data: result,
-      });
+      return sendSuccess(res, 201, { data: result });
     } catch (error) {
       next(error);
     }
@@ -58,8 +52,7 @@ class BusinessController {
 
       const businesses = await BusinessService.listBusinesses();
 
-      res.status(200).json({
-        success: true,
+      return sendSuccess(res, 200, {
         data: businesses,
         count: businesses.length,
       });
@@ -86,16 +79,10 @@ class BusinessController {
 
       const business = await BusinessService.getBusiness(id);
 
-      res.status(200).json({
-        success: true,
-        data: business,
-      });
+      return sendSuccess(res, 200, { data: business });
     } catch (error) {
       if (error.message === 'Business not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -119,10 +106,7 @@ class BusinessController {
 
       const business = await BusinessService.updateBusiness(id, req.body);
 
-      res.status(200).json({
-        success: true,
-        data: business,
-      });
+      return sendSuccess(res, 200, { data: business });
     } catch (error) {
       next(error);
     }
@@ -146,10 +130,7 @@ class BusinessController {
 
       const apiKeys = await BusinessService.getApiKeys(id);
 
-      res.status(200).json({
-        success: true,
-        data: apiKeys,
-      });
+      return sendSuccess(res, 200, { data: apiKeys });
     } catch (error) {
       next(error);
     }
@@ -173,8 +154,7 @@ class BusinessController {
 
       const key = await BusinessService.createApiKey(id);
 
-      res.status(201).json({
-        success: true,
+      return sendSuccess(res, 201, {
         data: { key },
         message: 'Save this key securely. It will not be shown again.',
       });
@@ -201,8 +181,7 @@ class BusinessController {
 
       const key = await BusinessService.rotateApiKey(id);
 
-      res.status(201).json({
-        success: true,
+      return sendSuccess(res, 201, {
         data: { key },
         message: 'Old API keys have been deactivated',
       });

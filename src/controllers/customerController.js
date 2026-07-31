@@ -1,5 +1,5 @@
 const CustomerService = require('../services/customerService');
-const logger = require('../utils/logger');
+const { sendSuccess, sendError } = require('../utils/httpResponses');
 
 class CustomerController {
   /**
@@ -11,10 +11,7 @@ class CustomerController {
       const businessId = req.businessId;
 
       if (!name || !email) {
-        return res.status(400).json({
-          success: false,
-          message: 'Name and email are required',
-        });
+        return sendError(res, 400, 'Name and email are required');
       }
 
       const customer = await CustomerService.createCustomer(
@@ -23,16 +20,10 @@ class CustomerController {
         email
       );
 
-      res.status(201).json({
-        success: true,
-        data: customer,
-      });
+      return sendSuccess(res, 201, { data: customer });
     } catch (error) {
       if (error.message.includes('already exists')) {
-        return res.status(409).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 409, error.message);
       }
       next(error);
     }
@@ -48,16 +39,10 @@ class CustomerController {
 
       const customer = await CustomerService.getCustomer(businessId, id);
 
-      res.status(200).json({
-        success: true,
-        data: customer,
-      });
+      return sendSuccess(res, 200, { data: customer });
     } catch (error) {
       if (error.message === 'Customer not found') {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
+        return sendError(res, 404, error.message);
       }
       next(error);
     }
@@ -72,8 +57,7 @@ class CustomerController {
 
       const customers = await CustomerService.getCustomersByBusiness(businessId);
 
-      res.status(200).json({
-        success: true,
+      return sendSuccess(res, 200, {
         data: customers,
         count: customers.length,
       });
@@ -92,10 +76,7 @@ class CustomerController {
 
       const customer = await CustomerService.updateCustomer(businessId, id, req.body);
 
-      res.status(200).json({
-        success: true,
-        data: customer,
-      });
+      return sendSuccess(res, 200, { data: customer });
     } catch (error) {
       next(error);
     }
