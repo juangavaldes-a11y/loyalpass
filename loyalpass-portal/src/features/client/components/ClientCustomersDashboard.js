@@ -65,6 +65,9 @@ export default function ClientCustomersDashboard() {
   const completedSteps = onboardingSteps.filter((step) => step.completed).length;
   const progressPercent = Math.round((completedSteps / onboardingSteps.length) * 100);
   const onboardingStatusLabel = businessProfile?.onboarding_status || 'not_started';
+  const nextBestAction = onboardingSteps.find((step) => !step.completed)?.label || 'You are fully set up.';
+  const customerCount = customers.length;
+  const passReady = Boolean(passQuery.data?.data?.id);
 
   function handleCreate(event) {
     event.preventDefault();
@@ -129,13 +132,36 @@ export default function ClientCustomersDashboard() {
         </button>
       </header>
 
+      <section className={styles.summaryGrid}>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Onboarding</span>
+          <h3>{progressPercent}% complete</h3>
+          <p className={styles.mutedText}>Current phase: {onboardingStatusLabel}</p>
+          <div className={styles.progressTrack}>
+            <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+          </div>
+        </article>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Customers</span>
+          <h3>{customerCount}</h3>
+          <p className={styles.mutedText}>Members currently tracked in your loyalty workspace.</p>
+        </article>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Wallet</span>
+          <h3>{passReady ? 'Ready' : 'Pending'}</h3>
+          <p className={styles.mutedText}>Passes become available as soon as the first member is onboarded.</p>
+        </article>
+      </section>
+
       <section className={styles.grid}>
         <article className={styles.card}>
-          <h2>Onboarding Guide</h2>
+          <div className={styles.sectionHeadline}>
+            <h2>Onboarding Guide</h2>
+            <span className={styles.pill}>{onboardingStatusLabel}</span>
+          </div>
           <div className={styles.notice}>
             <p><strong>Status:</strong> {onboardingStatusLabel}</p>
             <p><strong>Plan:</strong> {businessProfile?.plan || 'starter'}</p>
-            <p><strong>Progress:</strong> {progressPercent}% complete</p>
             <p><strong>Billing:</strong> {businessProfile?.subscription_status || 'trial'}</p>
             {quotaStatusQuery.data?.data ? (
               <p><strong>Quota:</strong> {quotaStatusQuery.data.data.checks?.customers?.allowed ? 'Within plan limits' : 'Needs attention'} </p>
@@ -148,7 +174,7 @@ export default function ClientCustomersDashboard() {
               </li>
             ))}
           </ul>
-          <p className={styles.status}>Next step: {onboardingSteps.find((step) => !step.completed)?.label || 'You are fully set up.'}</p>
+          <p className={styles.status}>Next step: {nextBestAction}</p>
         </article>
 
         <article className={styles.card}>

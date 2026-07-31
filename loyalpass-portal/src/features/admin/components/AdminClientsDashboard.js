@@ -55,6 +55,10 @@ export default function AdminClientsDashboard() {
 
   const lookupData = clientLookup.data?.data || null;
   const businessList = businessListQuery.data?.data || [];
+  const clientCount = businessList.length;
+  const completedOnboarding = businessList.filter((business) => business.onboarding_status === 'completed').length;
+  const needsAttention = businessList.filter((business) => business.onboarding_status !== 'completed').length;
+  const nextPriority = completedOnboarding === clientCount && clientCount > 0 ? 'Everything is moving smoothly.' : 'Review the next client onboarding step.';
 
   const updatePayload = useMemo(() => {
     const payload = {};
@@ -135,9 +139,30 @@ export default function AdminClientsDashboard() {
         </button>
       </header>
 
+      <section className={styles.summaryGrid}>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Clients</span>
+          <h3>{clientCount}</h3>
+          <p className={styles.mutedText}>Active loyalty businesses managed through this portal.</p>
+        </article>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Onboarding</span>
+          <h3>{completedOnboarding}/{clientCount}</h3>
+          <p className={styles.mutedText}>Complete profiles ready for launch and growth.</p>
+        </article>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>Focus</span>
+          <h3>{needsAttention}</h3>
+          <p className={styles.mutedText}>{nextPriority}</p>
+        </article>
+      </section>
+
       <section className={styles.grid}>
         <article className={styles.card}>
-          <h2>Onboard Client</h2>
+          <div className={styles.sectionHeadline}>
+            <h2>Onboard Client</h2>
+            <span className={styles.pill}>Launch flow</span>
+          </div>
           <form onSubmit={handleCreate} className={styles.form}>
             <input
               placeholder="Business name"

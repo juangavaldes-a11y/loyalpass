@@ -33,6 +33,27 @@
   line-height: 1.5;
 }
 
+.heroActions,
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
+  background: rgba(255, 255, 255, 0.16);
+  color: #f7fcff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .grid {
   display: grid;
   gap: 1rem;
@@ -56,11 +77,15 @@
   gap: 0.65rem;
 }
 
-.form input {
+.form input,
+.form select,
+.form textarea {
   border: 1px solid #c8d7e6;
   border-radius: 10px;
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
 }
 
 .form button,
@@ -112,6 +137,45 @@
   padding: 0.75rem;
   border-radius: 10px;
   overflow-wrap: anywhere;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.statCard {
+  border: 1px solid #d9e4ef;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f2f8ff 100%);
+  padding: 1rem;
+  box-shadow: 0 8px 24px rgba(16, 39, 66, 0.06);
+}
+
+.statCard h3 {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.progressTrack {
+  margin-top: 0.7rem;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e4eef7;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #1e5f9d 0%, #2a7f7f 100%);
+}
+
+.mutedText {
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .status {

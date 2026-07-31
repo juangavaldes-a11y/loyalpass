@@ -50,11 +50,15 @@ export default function LoginForm() {
       <header className={styles.hero}>
         <p className={styles.kicker}>Secure Access</p>
         <h1>LoyalPass Sign In</h1>
-        <p>Role-based access for platform admins and client teams.</p>
+        <p>Role-based access for platform admins and client teams, with guided next steps after login.</p>
       </header>
 
       <section className={styles.card}>
-        <h2>Login</h2>
+        <div className={styles.sectionHeadline}>
+          <h2>Login</h2>
+          <span className={styles.pill}>Portal access</span>
+        </div>
+        <p className={styles.mutedText}>Use your configured admin or client credentials to continue into the workspace.</p>
         <form onSubmit={handleSubmit} className={styles.form}>
           <input
             type="email"
