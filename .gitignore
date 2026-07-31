@@ -18,6 +18,7 @@ certs/
 coverage/
 .nyc_output/
 .mocha-registry/
+# Keep dependency lockfiles for CI reproducibility
 package-lock.json
 yarn.lock
 
