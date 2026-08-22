@@ -69,6 +69,14 @@ const mergedConfig = {
     ...baseLoggingConfig,
     level: getEnvOrDefault('LOG_LEVEL', getConfigValue('logging', 'level', 'info')),
   },
+  smtp: {
+    host: getEnvOrDefault('SMTP_HOST', ''),
+    port: Number(getEnvOrDefault('SMTP_PORT', 587)),
+    secure: getEnvOrDefault('SMTP_SECURE', 'false') === 'true',
+    user: getEnvOrDefault('SMTP_USER', ''),
+    password: getSecretValue('SMTP_PASSWORD', ''),
+    from: getEnvOrDefault('SMTP_FROM', ''),
+  },
   secrets: {
     authSessionSecret: getSecretValue('AUTH_SESSION_SECRET', getConfigValue('secrets', 'authSessionSecret', '')),
     platformAdminEmail: getEnvOrDefault('PLATFORM_ADMIN_EMAIL', getConfigValue('secrets', 'platformAdminEmail', 'admin@loyalpass.local')),

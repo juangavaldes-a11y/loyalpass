@@ -2,6 +2,7 @@ const BusinessService = require('../services/businessService');
 const ExportService = require('../services/exportService');
 const SupportService = require('../services/supportService');
 const BackupService = require('../services/backupService');
+const BillingService = require('../services/billingService');
 const logger = require('../utils/logger');
 const { assertPlatformAdmin, assertBusinessAccess } = require('../utils/tenantAccess');
 const { sendSuccess, sendError } = require('../utils/httpResponses');
@@ -179,6 +180,41 @@ class BusinessController {
       if (error.message === 'Business not found') {
         return sendError(res, 404, error.message);
       }
+      next(error);
+    }
+  }
+
+  static async createSubscription(req, res, next) {
+    try {
+      const { id } = req.params;
+      assertBusinessAccess(req, id);
+      const result = await BillingService.createSubscription({
+        businessId: id,
+        plan: req.body.plan,
+        currency: req.body.currency,
+        returnUrl: req.body.returnUrl,
+        idempotencyKey: req.get('Idempotency-Key'),
+      });
+      return sendSuccess(res, 201, { data: result });
+    } catch (error) {
+      if (error.message === 'Business not found') return sendError(res, 404, error.message);
+      if (error.message.includes('Idempotency') || error.message.includes('Unknown billing')) return sendError(res, 400, error.message);
+      next(error);
+    }
+  }
+
+  static async recordPayment(req, res, next) {
+    try {
+      const { id } = req.params;
+      assertBusinessAccess(req, id);
+      const result = await BillingService.recordPayment({
+        businessId: id,
+        ...req.body,
+        idempotencyKey: req.get('Idempotency-Key'),
+      });
+      return sendSuccess(res, 201, { data: result });
+    } catch (error) {
+      if (error.message.includes('Idempotency')) return sendError(res, 400, error.message);
       next(error);
     }
   }

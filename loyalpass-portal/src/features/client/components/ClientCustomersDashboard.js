@@ -8,6 +8,7 @@ import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hook
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
+import ClientPromotionsPanel from './ClientPromotionsPanel';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -370,6 +371,8 @@ export default function ClientCustomersDashboard() {
           </table>
         </div>
       </section>
+
+      <ClientPromotionsPanel />
     </div>
   );
 }

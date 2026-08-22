@@ -12,6 +12,7 @@ const businessRoutes = require('./routes/businessRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const passRoutes = require('./routes/passRoutes');
 const pointsRoutes = require('./routes/pointsRoutes');
+const promotionRoutes = require('./routes/promotionRoutes');
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use(apiKeyAuth);
 app.use('/api/customers', customerRoutes);
 app.use('/api/passes', passRoutes);
 app.use('/api/points', pointsRoutes);
+app.use('/api/promotions', promotionRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
