@@ -33,7 +33,11 @@ class PointsController {
         return sendError(res, 400, 'Customer ID and amount are required');
       }
 
-      const points = await PointsService.addPoints(businessId, customer_id, amount);
+      const points = await PointsService.addPoints(businessId, customer_id, Number(amount), {
+        reason: req.body.reason,
+        idempotencyKey: req.get?.('Idempotency-Key'),
+        actorId: req.user?.sub || req.apiKeyId || businessId,
+      });
 
       return sendSuccess(res, 200, {
         data: points,
@@ -62,7 +66,11 @@ class PointsController {
         return sendError(res, 400, 'Customer ID and amount are required');
       }
 
-      const points = await PointsService.redeemPoints(businessId, customer_id, amount);
+      const points = await PointsService.redeemPoints(businessId, customer_id, Number(amount), {
+        reason: req.body.reason,
+        idempotencyKey: req.get?.('Idempotency-Key'),
+        actorId: req.user?.sub || req.apiKeyId || businessId,
+      });
 
       return sendSuccess(res, 200, {
         data: points,
@@ -73,6 +81,19 @@ class PointsController {
         ? 409
         : 400;
       return sendError(res, statusCode, error.message);
+    }
+  }
+
+  static async getTransactions(req, res, next) {
+    try {
+      const result = await PointsService.getTransactions(req.businessId, req.params.customerId, {
+        page: Number(req.query.page) || 1,
+        pageSize: Number(req.query.pageSize) || 20,
+      });
+      return sendSuccess(res, 200, result);
+    } catch (error) {
+      if (error.message === 'Customer not found') return sendError(res, 404, error.message);
+      return next(error);
     }
   }
 }

@@ -22,6 +22,9 @@ router.post('/:id/billing', writeLimiter, BusinessController.updateBilling);
 router.post('/:id/billing/subscriptions', writeLimiter, BusinessController.createSubscription);
 router.post('/:id/billing/payments', writeLimiter, BusinessController.recordPayment);
 router.get('/:id/quota-status', BusinessController.getQuotaStatus);
+router.get('/:id/analytics', BusinessController.getOperationalAnalytics);
+router.get('/:id/team', BusinessController.listTeamMembers);
+router.put('/:id/team/:userId', writeLimiter, BusinessController.updateTeamMember);
 router.get('/:id/modules', BusinessController.getModules);
 router.put('/:id/modules/:moduleKey', writeLimiter, BusinessController.updateModule);
 

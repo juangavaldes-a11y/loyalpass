@@ -12,6 +12,7 @@ export default function AdminAuditDashboard() {
     from: '',
     to: '',
   });
+  const [page, setPage] = useState(1);
 
   const queryParams = useMemo(() => {
     const params = {};
@@ -20,8 +21,15 @@ export default function AdminAuditDashboard() {
     if (filters.entityType) params.entityType = filters.entityType;
     if (filters.from) params.from = filters.from;
     if (filters.to) params.to = filters.to;
+    params.page = page;
+    params.pageSize = 25;
     return params;
-  }, [filters]);
+  }, [filters, page]);
+
+  function updateFilter(key, value) {
+    setPage(1);
+    setFilters((previous) => ({ ...previous, [key]: value }));
+  }
 
   const auditLogsQuery = useAuditLogs(queryParams);
   const entries = auditLogsQuery.data?.data || [];
@@ -40,27 +48,27 @@ export default function AdminAuditDashboard() {
         <input
           placeholder="Business ID"
           value={filters.businessId}
-          onChange={(event) => setFilters((prev) => ({ ...prev, businessId: event.target.value }))}
+          onChange={(event) => updateFilter('businessId', event.target.value)}
         />
         <input
           placeholder="Action"
           value={filters.action}
-          onChange={(event) => setFilters((prev) => ({ ...prev, action: event.target.value }))}
+          onChange={(event) => updateFilter('action', event.target.value)}
         />
         <input
           placeholder="Entity type"
           value={filters.entityType}
-          onChange={(event) => setFilters((prev) => ({ ...prev, entityType: event.target.value }))}
+          onChange={(event) => updateFilter('entityType', event.target.value)}
         />
         <input
           type="date"
           value={filters.from}
-          onChange={(event) => setFilters((prev) => ({ ...prev, from: event.target.value }))}
+          onChange={(event) => updateFilter('from', event.target.value)}
         />
         <input
           type="date"
           value={filters.to}
-          onChange={(event) => setFilters((prev) => ({ ...prev, to: event.target.value }))}
+          onChange={(event) => updateFilter('to', event.target.value)}
         />
       </form>
 
@@ -93,9 +101,11 @@ export default function AdminAuditDashboard() {
       </div>
 
       {pagination ? (
-        <p className={styles.status}>
-          Showing {entries.length} of {pagination.total} entries · page {pagination.page}/{pagination.totalPages}
-        </p>
+        <div className={styles.paginationControls}>
+          <p className={styles.status} aria-live="polite">Showing {entries.length} of {pagination.total} entries · page {pagination.page}/{pagination.totalPages}</p>
+          <button type="button" onClick={() => setPage((current) => current - 1)} disabled={pagination.page <= 1 || auditLogsQuery.isFetching}>Previous</button>
+          <button type="button" onClick={() => setPage((current) => current + 1)} disabled={pagination.page >= pagination.totalPages || auditLogsQuery.isFetching}>Next</button>
+        </div>
       ) : null}
     </section>
   );

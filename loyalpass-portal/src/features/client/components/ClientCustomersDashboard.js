@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBusinessProfile, useCreateCustomer, useCustomers, useUpdateCustomer } from '@/features/client/hooks/useCustomers';
 import { useQuotaStatus } from '@/features/admin/hooks/useClients';
-import { useAddPoints, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
+import { useAddPoints, usePointTransactions, usePoints, useRedeemPoints } from '@/features/client/hooks/usePoints';
 import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/usePasses';
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
@@ -13,6 +13,8 @@ import { useClientModules } from '@/features/client/hooks/useModules';
 import { getEnabledClientModules } from '@/modules/registry';
 import PortalShell from '@/features/shared/components/PortalShell';
 import ModuleSection from '@/features/shared/components/ModuleSection';
+import { useOperationalAnalytics } from '@/features/client/hooks/useOperationalAnalytics';
+import ClientTeamPanel from './ClientTeamPanel';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -24,13 +26,16 @@ function mutationStatus(mutation) {
 
 export default function ClientCustomersDashboard() {
   const router = useRouter();
-  const [createForm, setCreateForm] = useState({ name: '', email: '' });
-  const [editForm, setEditForm] = useState({ customerId: '', name: '', email: '' });
-  const [pointsForm, setPointsForm] = useState({ customerId: '', amount: '' });
-  const [passForm, setPassForm] = useState({ customerId: '', passId: '' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', tags: '', marketingConsent: false });
+  const [editForm, setEditForm] = useState({ name: '', email: '' });
+  const [pointsForm, setPointsForm] = useState({ amount: '', reason: '' });
+  const [passForm, setPassForm] = useState({ passId: '' });
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const deferredCustomerSearch = useDeferredValue(customerSearch);
 
   const businessProfileQuery = useBusinessProfile();
-  const customersQuery = useCustomers();
+  const customersQuery = useCustomers({ search: deferredCustomerSearch });
   const businessId = businessProfileQuery.data?.data?.id;
   const quotaStatusQuery = useQuotaStatus(businessId);
   const createMutation = useCreateCustomer();
@@ -40,12 +45,16 @@ export default function ClientCustomersDashboard() {
   const createPassMutation = useCreatePass();
   const updatePassMutation = useUpdatePass();
 
-  const pointsQuery = usePoints(pointsForm.customerId);
-  const passQuery = usePass(passForm.customerId);
-  const modulesQuery = useClientModules();
-
   const customers = customersQuery.data?.data || [];
+  const selectedCustomer = customers.find((customer) => customer.id === selectedCustomerId) || null;
+  const pointsQuery = usePoints(selectedCustomerId);
+  const pointTransactionsQuery = usePointTransactions(selectedCustomerId);
+  const passQuery = usePass(selectedCustomerId);
+  const modulesQuery = useClientModules();
+  const analyticsQuery = useOperationalAnalytics();
+
   const businessProfile = businessProfileQuery.data?.data || null;
+  const analytics = analyticsQuery.data?.data;
   const enabledModules = new Set(
     (modulesQuery.data?.data || []).filter((module) => module.enabled).map((module) => module.key)
   );
@@ -120,14 +129,19 @@ export default function ClientCustomersDashboard() {
 
   function handleCreate(event) {
     event.preventDefault();
-    createMutation.mutate(createForm);
+    createMutation.mutate({
+      name: createForm.name,
+      email: createForm.email,
+      tags: createForm.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+      marketing_consent: createForm.marketingConsent,
+    });
   }
 
   function handleUpdate(event) {
     event.preventDefault();
 
     updateMutation.mutate({
-      customerId: editForm.customerId,
+      customerId: selectedCustomerId,
       updates: {
         ...(editForm.name ? { name: editForm.name } : {}),
         ...(editForm.email ? { email: editForm.email } : {}),
@@ -138,28 +152,30 @@ export default function ClientCustomersDashboard() {
   function handleAddPoints(event) {
     event.preventDefault();
     addPointsMutation.mutate({
-      customerId: pointsForm.customerId,
+      customerId: selectedCustomerId,
       amount: Number(pointsForm.amount),
+      reason: pointsForm.reason || undefined,
     });
   }
 
   function handleRedeemPoints(event) {
     event.preventDefault();
     redeemPointsMutation.mutate({
-      customerId: pointsForm.customerId,
+      customerId: selectedCustomerId,
       amount: Number(pointsForm.amount),
+      reason: pointsForm.reason || undefined,
     });
   }
 
   function handleCreatePass(event) {
     event.preventDefault();
-    createPassMutation.mutate(passForm.customerId);
+    createPassMutation.mutate(selectedCustomerId);
   }
 
   function handleUpdatePass(event) {
     event.preventDefault();
     updatePassMutation.mutate({
-      customerId: passForm.customerId,
+      customerId: selectedCustomerId,
       passId: passForm.passId,
     });
   }
@@ -197,6 +213,11 @@ export default function ClientCustomersDashboard() {
           <span className={styles.pill}>Wallet</span>
           <h3>{passReady ? 'Ready' : 'Pending'}</h3>
           <p className={styles.mutedText}>Passes become available as soon as the first member is onboarded.</p>
+        </article>
+        <article className={styles.statCard}>
+          <span className={styles.pill}>30-day activity</span>
+          <h3>{analytics?.transactionCount ?? '—'}</h3>
+          <p className={styles.mutedText}>{analytics ? `${analytics.pointsIssued} issued · ${analytics.pointsRedeemed} redeemed` : 'Loading loyalty activity.'}</p>
         </article>
       </section>
 
@@ -251,6 +272,19 @@ export default function ClientCustomersDashboard() {
               onChange={(event) => setCreateForm((prev) => ({ ...prev, email: event.target.value }))}
               required
             />
+            <input
+              placeholder="Tags, separated by commas"
+              value={createForm.tags}
+              onChange={(event) => setCreateForm((prev) => ({ ...prev, tags: event.target.value }))}
+            />
+            <label className={styles.checkboxField}>
+              <input
+                type="checkbox"
+                checked={createForm.marketingConsent}
+                onChange={(event) => setCreateForm((prev) => ({ ...prev, marketingConsent: event.target.checked }))}
+              />
+              Customer agreed to marketing communications
+            </label>
             <button type="submit" disabled={createMutation.isPending}>Create customer</button>
           </form>
           {mutationStatus(createMutation) ? <p className={styles.status}>{mutationStatus(createMutation)}</p> : null}
@@ -259,12 +293,6 @@ export default function ClientCustomersDashboard() {
         <article className={styles.card}>
           <h2>Update Customer</h2>
           <form onSubmit={handleUpdate} className={styles.form}>
-            <input
-              placeholder="Customer ID"
-              value={editForm.customerId}
-              onChange={(event) => setEditForm((prev) => ({ ...prev, customerId: event.target.value }))}
-              required
-            />
             <input
               placeholder="New name"
               value={editForm.name}
@@ -276,7 +304,7 @@ export default function ClientCustomersDashboard() {
               value={editForm.email}
               onChange={(event) => setEditForm((prev) => ({ ...prev, email: event.target.value }))}
             />
-            <button type="submit" disabled={updateMutation.isPending}>Update customer</button>
+            <button type="submit" disabled={updateMutation.isPending || !selectedCustomer}>Update selected customer</button>
           </form>
           {mutationStatus(updateMutation) ? <p className={styles.status}>{mutationStatus(updateMutation)}</p> : null}
         </article>
@@ -288,12 +316,7 @@ export default function ClientCustomersDashboard() {
         <article className={styles.card}>
           <h2>Points</h2>
           <form className={styles.form} onSubmit={handleAddPoints}>
-            <input
-              placeholder="Customer ID"
-              value={pointsForm.customerId}
-              onChange={(event) => setPointsForm((prev) => ({ ...prev, customerId: event.target.value }))}
-              required
-            />
+            <p className={styles.mutedText}>{selectedCustomer ? `Selected: ${selectedCustomer.name}` : 'Select a customer from the directory.'}</p>
             <input
               type="number"
               min="1"
@@ -302,8 +325,13 @@ export default function ClientCustomersDashboard() {
               onChange={(event) => setPointsForm((prev) => ({ ...prev, amount: event.target.value }))}
               required
             />
-            <button type="submit" disabled={addPointsMutation.isPending}>Add points</button>
-            <button type="button" onClick={handleRedeemPoints} disabled={redeemPointsMutation.isPending}>
+            <input
+              placeholder="Reason for this adjustment"
+              value={pointsForm.reason}
+              onChange={(event) => setPointsForm((prev) => ({ ...prev, reason: event.target.value }))}
+            />
+            <button type="submit" disabled={addPointsMutation.isPending || !selectedCustomer}>Add points</button>
+            <button type="button" onClick={handleRedeemPoints} disabled={redeemPointsMutation.isPending || !selectedCustomer}>
               Redeem points
             </button>
           </form>
@@ -312,6 +340,18 @@ export default function ClientCustomersDashboard() {
           {pointsQuery.data?.data ? (
             <p className={styles.status}>Balance: {pointsQuery.data.data.balance}</p>
           ) : null}
+          {pointTransactionsQuery.data?.data?.length ? (
+            <div className={styles.ledgerList}>
+              <h3>Recent activity</h3>
+              {pointTransactionsQuery.data.data.map((entry) => (
+                <div className={styles.ledgerEntry} key={entry.id}>
+                  <strong>{entry.amount > 0 ? '+' : ''}{entry.amount} points</strong>
+                  <span>{entry.reason || entry.action}</span>
+                  <span>Balance {entry.balance_after}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </article>
         </ModuleSection> : null}
 
@@ -319,13 +359,8 @@ export default function ClientCustomersDashboard() {
         <article className={styles.card}>
           <h2>Passes</h2>
           <form className={styles.form} onSubmit={handleCreatePass}>
-            <input
-              placeholder="Customer ID"
-              value={passForm.customerId}
-              onChange={(event) => setPassForm((prev) => ({ ...prev, customerId: event.target.value }))}
-              required
-            />
-            <button type="submit" disabled={createPassMutation.isPending}>Create pass</button>
+            <p className={styles.mutedText}>{selectedCustomer ? `Selected: ${selectedCustomer.name}` : 'Select a customer from the directory.'}</p>
+            <button type="submit" disabled={createPassMutation.isPending || !selectedCustomer}>Create pass</button>
           </form>
 
           <form className={styles.form} onSubmit={handleUpdatePass}>
@@ -335,7 +370,7 @@ export default function ClientCustomersDashboard() {
               onChange={(event) => setPassForm((prev) => ({ ...prev, passId: event.target.value }))}
               required
             />
-            <button type="submit" disabled={updatePassMutation.isPending || !passForm.customerId}>
+            <button type="submit" disabled={updatePassMutation.isPending || !selectedCustomer}>
               Update pass
             </button>
           </form>
@@ -362,6 +397,14 @@ export default function ClientCustomersDashboard() {
           </button>
         </div>
 
+        <input
+          aria-label="Search customers"
+          className={styles.directorySearch}
+          placeholder="Search by customer name or email"
+          value={customerSearch}
+          onChange={(event) => setCustomerSearch(event.target.value)}
+        />
+
         {customersQuery.isLoading ? <p>Loading customers...</p> : null}
         {customersQuery.error ? <p className={styles.status}>{customersQuery.error.message}</p> : null}
 
@@ -375,10 +418,11 @@ export default function ClientCustomersDashboard() {
               </tr>
             </thead>
             <tbody>
+              {customers.length === 0 && !customersQuery.isLoading ? <tr><td colSpan="3">No customers match this search.</td></tr> : null}
               {customers.map((customer) => (
-                <tr key={customer.id}>
+                <tr key={customer.id} className={customer.id === selectedCustomerId ? styles.selectedRow : ''}>
                   <td>{customer.id}</td>
-                  <td>{customer.name}</td>
+                  <td><button type="button" className={styles.tableAction} onClick={() => setSelectedCustomerId(customer.id)}>{customer.name}</button></td>
                   <td>{customer.email}</td>
                 </tr>
               ))}
@@ -389,6 +433,7 @@ export default function ClientCustomersDashboard() {
       </ModuleSection> : null}
 
       {enabledModules.has('promotions') ? <ModuleSection module={moduleByKey.get('promotions')}><ClientPromotionsPanel /></ModuleSection> : null}
+      <ClientTeamPanel />
     </PortalShell>
   );
 }

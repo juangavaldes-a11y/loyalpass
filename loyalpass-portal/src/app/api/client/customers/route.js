@@ -25,8 +25,13 @@ export async function GET(request) {
     const { businessId, accessToken } = await getClientCredentials();
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
+    const query = new URLSearchParams();
+    ['search', 'page', 'pageSize'].forEach((key) => {
+      const value = searchParams.get(key);
+      if (value) query.set(key, value);
+    });
 
-    const path = customerId ? `/api/customers/${customerId}` : '/api/customers';
+    const path = customerId ? `/api/customers/${customerId}` : `/api/customers${query.size ? `?${query}` : ''}`;
 
     const data = await backendRequest(path, {
       headers: { Authorization: `Bearer ${accessToken}` },

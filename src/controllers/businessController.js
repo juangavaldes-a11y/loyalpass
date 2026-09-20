@@ -244,6 +244,42 @@ class BusinessController {
     }
   }
 
+  static async getOperationalAnalytics(req, res, next) {
+    try {
+      assertBusinessAccess(req, req.params.id);
+      const analytics = await BusinessService.getOperationalAnalytics(req.params.id, { days: Number(req.query.days) || 30 });
+      return sendSuccess(res, 200, { data: analytics });
+    } catch (error) {
+      if (error.message === 'Business not found') return sendError(res, 404, error.message);
+      if (error.message.includes('Access denied')) return sendError(res, 403, error.message);
+      return next(error);
+    }
+  }
+
+  static async listTeamMembers(req, res, next) {
+    try {
+      assertBusinessAccess(req, req.params.id);
+      if (!req.isPlatformAdmin && req.user?.role !== 'client_owner') return sendError(res, 403, 'Client owner access required');
+      const members = await BusinessService.listTeamMembers(req.params.id);
+      return sendSuccess(res, 200, { data: members });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  static async updateTeamMember(req, res, next) {
+    try {
+      assertBusinessAccess(req, req.params.id);
+      if (!req.isPlatformAdmin && req.user?.role !== 'client_owner') return sendError(res, 403, 'Client owner access required');
+      const member = await BusinessService.updateTeamMember(req.params.id, req.params.userId, req.body);
+      return sendSuccess(res, 200, { data: member });
+    } catch (error) {
+      if (error.message === 'Team member not found') return sendError(res, 404, error.message);
+      if (error.message.includes('Invalid') || error.message.includes('No team')) return sendError(res, 400, error.message);
+      return next(error);
+    }
+  }
+
   static async getModules(req, res, next) {
     try {
       assertPlatformAdmin(req);

@@ -14,6 +14,7 @@ const Promotion = sequelize.define(
     starts_at: { type: DataTypes.DATE, allowNull: true },
     ends_at: { type: DataTypes.DATE, allowNull: true },
     usage_limit: { type: DataTypes.INTEGER, allowNull: true },
+    audience_rules: { type: DataTypes.JSON, allowNull: false, defaultValue: {} },
   },
   {
     timestamps: true,

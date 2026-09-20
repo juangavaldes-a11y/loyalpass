@@ -53,3 +53,34 @@ a {
   font-weight: 700;
   font-family: var(--font-ibm-plex-mono), monospace;
 }
+
+.fieldLabel,
+.fieldHint {
+  display: block;
+}
+
+.fieldLabel {
+  margin-bottom: 0.35rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.fieldHint {
+  margin-top: 0.3rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.asyncStatus {
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.asyncStatusError {
+  color: #a34717;
+}
+
+.asyncStatusSuccess {
+  color: #176743;
+}

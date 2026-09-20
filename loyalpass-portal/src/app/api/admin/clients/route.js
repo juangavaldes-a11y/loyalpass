@@ -72,7 +72,7 @@ export async function PUT(request) {
   try {
     const session = await getAdminSession();
     const payload = await request.json();
-    const { businessId, apiKey, updates } = payload;
+    const { businessId, updates } = payload;
 
     if (!businessId) {
       return NextResponse.json(

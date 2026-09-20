@@ -402,6 +402,87 @@
   overflow-wrap: anywhere;
 }
 
+.directorySearch {
+  width: 100%;
+  margin-bottom: 0.85rem;
+  border: 1px solid #c8d7e6;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.selectedRow {
+  background: #e9f4ff;
+}
+
+.tableAction {
+  border: 0;
+  padding: 0;
+  color: #1e5f9d;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
+.tableAction:hover {
+  text-decoration: underline;
+}
+
+.ledgerList {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.ledgerEntry {
+  display: grid;
+  gap: 0.15rem;
+  border-top: 1px solid #e2ecf5;
+  padding-top: 0.55rem;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.ledgerEntry strong {
+  color: var(--text-primary);
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.paginationControls .status {
+  margin: 0 0.3rem 0 0;
+}
+
+.paginationControls button {
+  border: 1px solid #c8d7e6;
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  background: #fff;
+  color: #1e5f9d;
+  cursor: pointer;
+}
+
+.paginationControls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .moduleList {
   display: grid;
   gap: 0.65rem;

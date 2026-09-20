@@ -26,6 +26,16 @@ const Customer = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    tags: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+    },
+    marketing_consent: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   },
   {
     timestamps: true,

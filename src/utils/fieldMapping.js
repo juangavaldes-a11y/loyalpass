@@ -27,6 +27,8 @@ function mapCustomerUpdates(updates = {}) {
   const mappedUpdates = {};
   if (updates.name) mappedUpdates.name = updates.name;
   if (updates.email) mappedUpdates.email = updates.email;
+  if (Object.prototype.hasOwnProperty.call(updates, 'tags')) mappedUpdates.tags = updates.tags;
+  if (Object.prototype.hasOwnProperty.call(updates, 'marketing_consent')) mappedUpdates.marketing_consent = updates.marketing_consent;
   return mappedUpdates;
 }
 

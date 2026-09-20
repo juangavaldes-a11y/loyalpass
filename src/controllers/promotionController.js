@@ -15,7 +15,7 @@ class PromotionController {
   }
 
   static async redeem(req, res, next) {
-    try { return sendSuccess(res, 201, { data: await PromotionService.redeemPromotion(req.businessId, req.params.id, req.body.customer_id, req.get('Idempotency-Key')) }); } catch (error) { if (error.message.includes('required') || error.message.includes('active') || error.message.includes('limit')) return sendError(res, 400, error.message); if (error.message.includes('not found')) return sendError(res, 404, error.message); return next(error); }
+    try { return sendSuccess(res, 201, { data: await PromotionService.redeemPromotion(req.businessId, req.params.id, req.body.customer_id, req.get('Idempotency-Key')) }); } catch (error) { if (error.message.includes('required') || error.message.includes('active') || error.message.includes('limit')) return sendError(res, 400, error.message); if (error.message.includes('eligible')) return sendError(res, 403, error.message); if (error.message.includes('not found')) return sendError(res, 404, error.message); return next(error); }
   }
 }
 

@@ -14,6 +14,7 @@ const Payment = require('./Payment');
 const Promotion = require('./Promotion');
 const PromotionRedemption = require('./PromotionRedemption');
 const BusinessModule = require('./BusinessModule');
+const PointTransaction = require('./PointTransaction');
 
 // Define associations
 Business.hasMany(Customer, { foreignKey: 'business_id', onDelete: 'CASCADE' });
@@ -38,6 +39,10 @@ BusinessModule.belongsTo(Business, { foreignKey: 'business_id' });
 Points.belongsTo(Customer, { foreignKey: 'customer_id', as: 'customer' });
 Customer.hasOne(Points, { foreignKey: 'customer_id', as: 'points', onDelete: 'CASCADE' });
 Customer.hasMany(Pass, { foreignKey: 'customer_id', onDelete: 'CASCADE' });
+Customer.hasMany(PointTransaction, { foreignKey: 'customer_id', onDelete: 'CASCADE' });
+Points.hasMany(PointTransaction, { foreignKey: 'points_id', onDelete: 'CASCADE' });
+PointTransaction.belongsTo(Customer, { foreignKey: 'customer_id' });
+PointTransaction.belongsTo(Points, { foreignKey: 'points_id' });
 
 module.exports = {
   Business,
@@ -52,4 +57,5 @@ module.exports = {
   Promotion,
   PromotionRedemption,
   BusinessModule,
+  PointTransaction,
 };

@@ -8,7 +8,7 @@ class CustomerController {
    */
   static async createCustomer(req, res, next) {
     try {
-      const { name, email } = req.body;
+      const { name, email, tags, marketing_consent: marketingConsent } = req.body;
       const businessId = req.businessId;
 
       if (!name || !email) {
@@ -23,7 +23,8 @@ class CustomerController {
       const customer = await CustomerService.createCustomer(
         businessId,
         name,
-        email
+        email,
+        { tags: Array.isArray(tags) ? tags : [], marketingConsent: Boolean(marketingConsent) }
       );
 
       logger.info('Customer created via controller', {
@@ -84,17 +85,26 @@ class CustomerController {
     try {
       const businessId = req.businessId;
 
-      const customers = await CustomerService.getCustomersByBusiness(businessId);
+      const query = req.query || {};
+      const hasPagination = query.page || query.pageSize || query.search;
+      const page = Math.max(1, Number(query.page) || 1);
+      const pageSize = Math.min(100, Math.max(1, Number(query.pageSize) || 25));
+      const customers = await CustomerService.getCustomersByBusiness(businessId, {
+        search: query.search || '',
+        ...(hasPagination ? { page, pageSize } : {}),
+      });
+      const customerData = Array.isArray(customers) ? customers : customers.data;
 
       logger.info('Customer list fetched via controller', {
         businessId,
-        count: customers?.length || 0,
+        count: customerData?.length || 0,
         path: req.path,
         method: req.method,
       });
       return sendSuccess(res, 200, {
-        data: customers,
-        count: customers.length,
+        data: customerData,
+        count: customerData.length,
+        ...(Array.isArray(customers) ? {} : { pagination: customers.pagination }),
       });
     } catch (error) {
       logger.error('Customer controller list flow failed', error, {

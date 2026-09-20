@@ -5,8 +5,10 @@ export async function getBusinessProfile() {
   return response.data;
 }
 
-export async function getCustomers() {
-  const response = await portalApi.get('/client/customers');
+export async function getCustomers({ search = '', page = 1, pageSize = 25 } = {}) {
+  const response = await portalApi.get('/client/customers', {
+    params: { search, page, pageSize },
+  });
   return response.data;
 }
 

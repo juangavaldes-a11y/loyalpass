@@ -5,7 +5,7 @@ import { useCreatePromotion, usePromotions, useUpdatePromotion } from '@/feature
 import styles from '@/app/portal.module.css';
 
 export default function ClientPromotionsPanel() {
-  const [form, setForm] = useState({ name: '', description: '', reward_value: 10, status: 'draft', usage_limit: '' });
+  const [form, setForm] = useState({ name: '', description: '', reward_value: 10, status: 'draft', usage_limit: '', audienceTags: '', requiresMarketingConsent: false });
   const promotionsQuery = usePromotions();
   const createMutation = useCreatePromotion();
   const updateMutation = useUpdatePromotion();
@@ -13,7 +13,16 @@ export default function ClientPromotionsPanel() {
 
   function handleCreate(event) {
     event.preventDefault();
-    createMutation.mutate({ ...form, reward_value: Number(form.reward_value), usage_limit: form.usage_limit ? Number(form.usage_limit) : null });
+    const { audienceTags, requiresMarketingConsent, ...promotion } = form;
+    createMutation.mutate({
+      ...promotion,
+      reward_value: Number(form.reward_value),
+      usage_limit: form.usage_limit ? Number(form.usage_limit) : null,
+      audience_rules: {
+        tagsAny: audienceTags.split(',').map((tag) => tag.trim()).filter(Boolean),
+        requiresMarketingConsent,
+      },
+    });
   }
 
   function publish(promotion) {
@@ -34,6 +43,11 @@ export default function ClientPromotionsPanel() {
         <textarea placeholder="Describe the offer" value={form.description} onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))} />
         <input type="number" min="1" placeholder="Reward points" value={form.reward_value} onChange={(event) => setForm((prev) => ({ ...prev, reward_value: event.target.value }))} required />
         <input type="number" min="1" placeholder="Usage limit (optional)" value={form.usage_limit} onChange={(event) => setForm((prev) => ({ ...prev, usage_limit: event.target.value }))} />
+        <input placeholder="Audience tags (comma separated)" value={form.audienceTags} onChange={(event) => setForm((prev) => ({ ...prev, audienceTags: event.target.value }))} />
+        <label className={styles.checkboxField}>
+          <input type="checkbox" checked={form.requiresMarketingConsent} onChange={(event) => setForm((prev) => ({ ...prev, requiresMarketingConsent: event.target.checked }))} />
+          Require marketing consent
+        </label>
         <select value={form.status} onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}>
           <option value="draft">Draft</option>
           <option value="published">Published</option>
@@ -44,10 +58,10 @@ export default function ClientPromotionsPanel() {
       {createMutation.isSuccess ? <p className={styles.status}>Promotion created.</p> : null}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
-          <thead><tr><th>Name</th><th>Reward</th><th>Status</th><th>Uses</th><th /></tr></thead>
+          <thead><tr><th>Name</th><th>Audience</th><th>Reward</th><th>Status</th><th>Uses</th><th /></tr></thead>
           <tbody>{promotions.map((promotion) => (
             <tr key={promotion.id}>
-              <td>{promotion.name}</td><td>{promotion.reward_value} points</td><td>{promotion.status}</td><td>{promotion.usage_limit || 'Unlimited'}</td>
+              <td>{promotion.name}</td><td>{promotion.audience_rules?.tagsAny?.join(', ') || (promotion.audience_rules?.requiresMarketingConsent ? 'Consent required' : 'All members')}</td><td>{promotion.reward_value} points</td><td>{promotion.status}</td><td>{promotion.usage_limit || 'Unlimited'}</td>
               <td><button type="button" onClick={() => publish(promotion)} disabled={updateMutation.isPending}>{promotion.status === 'published' ? 'Pause' : 'Publish'}</button></td>
             </tr>
           ))}</tbody>

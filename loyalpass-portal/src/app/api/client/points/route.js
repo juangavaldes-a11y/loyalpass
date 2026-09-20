@@ -25,6 +25,7 @@ export async function GET(request) {
     const { businessId, accessToken } = await getClientCredentialsFromSession();
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
+    const history = searchParams.get('history') === 'true';
 
     if (!customerId) {
       return NextResponse.json(
@@ -33,7 +34,7 @@ export async function GET(request) {
       );
     }
 
-    const data = await backendRequest(`/api/points/${customerId}`, {
+    const data = await backendRequest(`/api/points/${customerId}${history ? '/transactions' : ''}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cacheMode: 'force-cache',
       revalidate: 20,
@@ -54,7 +55,7 @@ export async function POST(request) {
   try {
     const { businessId, accessToken } = await getClientCredentialsFromSession();
     const payload = await request.json();
-    const { action, customerId, amount } = payload;
+    const { action, customerId, amount, reason } = payload;
 
     if (!action || !customerId || amount === undefined) {
       return NextResponse.json(
@@ -67,10 +68,14 @@ export async function POST(request) {
 
     const data = await backendRequest(endpoint, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Idempotency-Key': crypto.randomUUID(),
+      },
       body: {
         customer_id: customerId,
         amount,
+        reason,
       },
     });
 

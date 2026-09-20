@@ -1,4 +1,4 @@
-const { Business, ApiKey } = require('../models');
+const { Business, ApiKey, Customer, Pass, Promotion, PointTransaction, PortalUser } = require('../models');
 const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 const { mapBusinessUpdates } = require('../utils/fieldMapping');
@@ -244,6 +244,44 @@ class BusinessService {
       logger.error('Error listing businesses:', error);
       throw error;
     }
+  }
+
+  static async getOperationalAnalytics(businessId, { days = 30 } = {}) {
+    const business = await Business.findByPk(businessId);
+    if (!business) throw new Error('Business not found');
+    const since = new Date(Date.now() - Math.min(365, Math.max(1, days)) * 24 * 60 * 60 * 1000);
+    const [memberCount, passCount, activePromotions, transactions] = await Promise.all([
+      Customer.count({ where: { business_id: businessId } }),
+      Pass.count({ where: { business_id: businessId } }),
+      Promotion.count({ where: { business_id: businessId, status: 'published' } }),
+      PointTransaction.findAll({ where: { business_id: businessId, createdAt: { [require('sequelize').Op.gte]: since } }, attributes: ['amount'] }),
+    ]);
+    const pointsIssued = transactions.filter((transaction) => transaction.amount > 0).reduce((sum, transaction) => sum + transaction.amount, 0);
+    const pointsRedeemed = transactions.filter((transaction) => transaction.amount < 0).reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
+    return { periodDays: Number(days), memberCount, passCount, activePromotions, pointsIssued, pointsRedeemed, transactionCount: transactions.length };
+  }
+
+  static async listTeamMembers(businessId) {
+    return PortalUser.findAll({
+      where: { business_id: businessId },
+      attributes: { exclude: ['password_hash'] },
+      order: [['createdAt', 'ASC']],
+    });
+  }
+
+  static async updateTeamMember(businessId, userId, { role, active }) {
+    const member = await PortalUser.findOne({ where: { id: userId, business_id: businessId } });
+    if (!member) throw new Error('Team member not found');
+    const updates = {};
+    if (role !== undefined) {
+      if (!['client_owner', 'client_staff'].includes(role)) throw new Error('Invalid team role');
+      updates.role = role;
+    }
+    if (active !== undefined) updates.active = Boolean(active);
+    if (!Object.keys(updates).length) throw new Error('No team member changes supplied');
+    await member.update(updates);
+    await AuditService.log({ businessId, actorType: 'user', actorId: businessId, action: 'team.member.update', entityType: 'portal_user', entityId: member.id, metadata: updates });
+    return member.toJSON();
   }
 
 }

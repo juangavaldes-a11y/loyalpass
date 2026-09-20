@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useClientLookup, useCreateClient, useUpdateClient, useUpdateBilling, useUpdateOnboarding, useQuotaStatus } from '@/features/admin/hooks/useClients';
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
+import FormField from '@/features/shared/components/FormField';
+import AsyncStatus from '@/features/shared/components/AsyncStatus';
 import styles from '@/app/portal.module.css';
 
 function statusFromMutation(mutation) {
@@ -132,7 +134,6 @@ export default function AdminClientsDashboard() {
 
     updateClientMutation.mutate({
       businessId: lookup.businessId,
-      apiKey: lookup.apiKey,
       updates: updatePayload,
     });
   }
@@ -218,44 +219,29 @@ export default function AdminClientsDashboard() {
             <p>{adminGuidedAction}</p>
           </div>
           <form onSubmit={handleCreate} className={styles.form}>
-            <input
-              placeholder="Business name"
-              value={createForm.name}
-              onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))}
-              required
-            />
-            <input
-              placeholder="Logo URL"
-              value={createForm.logo_url}
-              onChange={(event) => setCreateForm((prev) => ({ ...prev, logo_url: event.target.value }))}
-            />
-            <input
-              placeholder="#18406f"
-              value={createForm.brand_color}
-              onChange={(event) => setCreateForm((prev) => ({ ...prev, brand_color: event.target.value }))}
-            />
-            <input
-              placeholder="#ffffff"
-              value={createForm.text_color}
-              onChange={(event) => setCreateForm((prev) => ({ ...prev, text_color: event.target.value }))}
-            />
+            <FormField label="Business name">
+              <input value={createForm.name} onChange={(event) => setCreateForm((prev) => ({ ...prev, name: event.target.value }))} required />
+            </FormField>
+            <FormField label="Logo URL">
+              <input type="url" value={createForm.logo_url} onChange={(event) => setCreateForm((prev) => ({ ...prev, logo_url: event.target.value }))} />
+            </FormField>
+            <FormField label="Brand color">
+              <input value={createForm.brand_color} onChange={(event) => setCreateForm((prev) => ({ ...prev, brand_color: event.target.value }))} pattern="#[0-9a-fA-F]{6}" />
+            </FormField>
+            <FormField label="Text color">
+              <input value={createForm.text_color} onChange={(event) => setCreateForm((prev) => ({ ...prev, text_color: event.target.value }))} pattern="#[0-9a-fA-F]{6}" />
+            </FormField>
             <button type="submit" disabled={createClientMutation.isPending}>Create client</button>
           </form>
-          {createClientMutation.data?.data?.apiKey ? (
+          {createClientMutation.data?.data?.business ? (
             <div className={styles.notice}>
-              <p><strong>Business ID:</strong> {createClientMutation.data.data.business.id}</p>
-              <p><strong>API Key:</strong> {createClientMutation.data.data.apiKey}</p>
+              <p><strong>Client created:</strong> {createClientMutation.data.data.business.name}</p>
               {createClientMutation.data.data.owner ? (
-                <>
-                  <p><strong>Owner Email:</strong> {createClientMutation.data.data.owner.email}</p>
-                  <p><strong>Owner Password:</strong> {createClientMutation.data.data.owner.password}</p>
-                </>
+                <p><strong>Owner email:</strong> {createClientMutation.data.data.owner.email}</p>
               ) : null}
             </div>
           ) : null}
-          {statusFromMutation(createClientMutation) ? (
-            <p className={styles.status}>{statusFromMutation(createClientMutation)}</p>
-          ) : null}
+          <AsyncStatus tone={createClientMutation.isError ? 'error' : createClientMutation.isSuccess ? 'success' : 'default'}>{statusFromMutation(createClientMutation)}</AsyncStatus>
         </article>
 
         <article className={styles.card}>
@@ -305,7 +291,7 @@ export default function AdminClientsDashboard() {
               value={updateForm.text_color}
               onChange={(event) => setUpdateForm((prev) => ({ ...prev, text_color: event.target.value }))}
             />
-            <button type="submit" disabled={updateClientMutation.isPending || !lookup.businessId || !lookup.apiKey}>
+            <button type="submit" disabled={updateClientMutation.isPending || !lookup.businessId}>
               Update client
             </button>
           </form>

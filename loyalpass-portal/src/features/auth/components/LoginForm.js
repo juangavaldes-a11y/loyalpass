@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '@/app/portal.module.css';
+import FormField from '@/features/shared/components/FormField';
+import AsyncStatus from '@/features/shared/components/AsyncStatus';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -60,25 +62,30 @@ export default function LoginForm() {
         </div>
         <p className={styles.mutedText}>Use your configured admin or client credentials to continue into the workspace.</p>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <input
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@company.com"
-            required
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Password"
-            required
-          />
+          <FormField label="Email address">
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@company.com"
+              autoComplete="email"
+              required
+            />
+          </FormField>
+          <FormField label="Password">
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </FormField>
           <button type="submit" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
-        {error ? <p className={styles.status}>{error}</p> : null}
+        <AsyncStatus tone="error">{error}</AsyncStatus>
       </section>
     </div>
   );

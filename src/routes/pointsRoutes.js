@@ -8,6 +8,7 @@ router.use(requireModule('points'));
 
 // Get points
 router.get('/:customerId', PointsController.getPoints);
+router.get('/:customerId/transactions', PointsController.getTransactions);
 
 // Add points
 router.post('/add', writeLimiter, PointsController.addPoints);

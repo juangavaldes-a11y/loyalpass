@@ -1,4 +1,6 @@
 const { Customer, Points } = require('../models');
+const { Op } = require('sequelize');
+const sequelize = require('../config/db');
 const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 const { mapCustomerUpdates } = require('../utils/fieldMapping');
@@ -8,7 +10,7 @@ class CustomerService {
   /**
    * Create new customer
    */
-  static async createCustomer(businessId, name, email) {
+  static async createCustomer(businessId, name, email, { tags = [], marketingConsent = false } = {}) {
     try {
       // Check if customer already exists
       const existing = await Customer.findOne({
@@ -23,6 +25,8 @@ class CustomerService {
         business_id: businessId,
         name,
         email,
+        tags,
+        marketing_consent: marketingConsent,
       });
 
       const { customer: createdCustomer } = await createCustomerWithPoints(customer);
@@ -63,14 +67,43 @@ class CustomerService {
   /**
    * Get customers for business
    */
-  static async getCustomersByBusiness(businessId) {
+  static async getCustomersByBusiness(businessId, { search = '', page, pageSize } = {}) {
     try {
-      const customers = await Customer.findAll({
-        where: { business_id: businessId },
+      const where = { business_id: businessId };
+      if (search.trim()) {
+        const likeOperator = sequelize.getDialect() === 'postgres' ? Op.iLike : Op.like;
+        where[Op.or] = [
+          { name: { [likeOperator]: `%${search.trim()}%` } },
+          { email: { [likeOperator]: `%${search.trim()}%` } },
+        ];
+      }
+
+      const options = {
+        where,
         include: [{ model: Points, as: 'points' }],
-      });
-      logger.info('Customer list loaded', { businessId, count: customers?.length || 0 });
-      return customers;
+        order: [['createdAt', 'DESC']],
+      };
+      if (page && pageSize) {
+        options.limit = pageSize;
+        options.offset = (page - 1) * pageSize;
+      }
+
+      const customers = await Customer.findAll(options);
+      if (!page || !pageSize) {
+        logger.info('Customer list loaded', { businessId, count: customers?.length || 0 });
+        return customers;
+      }
+
+      const count = await Customer.count({ where });
+      return {
+        data: customers,
+        pagination: {
+          page,
+          pageSize,
+          total: count,
+          totalPages: Math.max(1, Math.ceil(count / pageSize)),
+        },
+      };
     } catch (error) {
       logger.error('Error getting customers:', error);
       throw error;
