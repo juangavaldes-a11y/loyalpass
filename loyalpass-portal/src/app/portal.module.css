@@ -355,6 +355,48 @@
   overflow-wrap: anywhere;
 }
 
+.moduleList {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.moduleList textarea {
+  min-height: 4.5rem;
+  border: 1px solid #c8d7e6;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.moduleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid #d9e4ef;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.moduleRow p {
+  margin-top: 0.2rem;
+}
+
+.moduleRow button {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  color: #ecf7ff;
+  background: #1e5f9d;
+}
+
+.moduleRow button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .hero {
     padding: 1.25rem;

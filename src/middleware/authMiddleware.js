@@ -1,4 +1,5 @@
 const ApiKey = require('../models/ApiKey');
+const AuthService = require('../services/authService');
 const logger = require('../utils/logger');
 
 /**
@@ -6,6 +7,19 @@ const logger = require('../utils/logger');
  */
 const apiKeyAuth = async (req, res, next) => {
   try {
+    const authorization = req.headers.authorization || '';
+    const bearerToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : null;
+    if (bearerToken) {
+      const session = await AuthService.verifyToken(bearerToken);
+      if (!session?.businessId || !['client_owner', 'client_staff'].includes(session.role)) {
+        return res.status(403).json({ success: false, message: 'Invalid client session' });
+      }
+
+      req.businessId = session.businessId;
+      req.user = session;
+      return next();
+    }
+
     const apiKey = req.headers['x-api-key'];
 
     if (!apiKey) {
@@ -15,10 +29,11 @@ const apiKeyAuth = async (req, res, next) => {
       });
     }
 
-    // Look up the API key in database
+    // Store only a digest at rest and look it up by the non-sensitive prefix.
     const keyRecord = await ApiKey.findOne({
       where: {
-        key: apiKey,
+        key_prefix: apiKey.slice(0, 12),
+        key_hash: ApiKey.hash(apiKey),
         active: true,
       },
     });

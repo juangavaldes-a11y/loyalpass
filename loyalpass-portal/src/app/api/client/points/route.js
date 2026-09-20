@@ -10,19 +10,19 @@ async function getClientCredentialsFromSession() {
   const token = cookieStore.get(getSessionCookieName())?.value;
   const session = await verifySessionToken(token);
 
-  if (!session?.businessId || !session?.apiKey) {
+  if (!session?.businessId || !session?.accessToken) {
     throw new Error('Missing authenticated client context');
   }
 
   return {
     businessId: session.businessId,
-    apiKey: session.apiKey,
+    accessToken: session.accessToken,
   };
 }
 
 export async function GET(request) {
   try {
-    const { businessId, apiKey } = await getClientCredentialsFromSession();
+    const { businessId, accessToken } = await getClientCredentialsFromSession();
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
 
@@ -34,7 +34,7 @@ export async function GET(request) {
     }
 
     const data = await backendRequest(`/api/points/${customerId}`, {
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
       cacheMode: 'force-cache',
       revalidate: 20,
       tags: [`points:${businessId}`],
@@ -52,7 +52,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { businessId, apiKey } = await getClientCredentialsFromSession();
+    const { businessId, accessToken } = await getClientCredentialsFromSession();
     const payload = await request.json();
     const { action, customerId, amount } = payload;
 
@@ -67,7 +67,7 @@ export async function POST(request) {
 
     const data = await backendRequest(endpoint, {
       method: 'POST',
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
       body: {
         customer_id: customerId,
         amount,

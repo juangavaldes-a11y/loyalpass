@@ -23,7 +23,6 @@ export async function POST(request) {
       sub: backendResponse.data.email,
       role: backendResponse.data.role,
       businessId: backendResponse.data.businessId,
-      apiKey: backendResponse.data.apiKey,
       accessToken: backendResponse.data.accessToken,
       email: backendResponse.data.email,
     });

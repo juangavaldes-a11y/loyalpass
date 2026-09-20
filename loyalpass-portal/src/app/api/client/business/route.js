@@ -9,22 +9,22 @@ async function getClientCredentials() {
   const token = cookieStore.get(getSessionCookieName())?.value;
   const session = await verifySessionToken(token);
 
-  if (!session?.businessId || !session?.apiKey) {
+  if (!session?.businessId || !session?.accessToken) {
     throw new Error('Missing authenticated client context');
   }
 
   return {
     businessId: session.businessId,
-    apiKey: session.apiKey,
+    accessToken: session.accessToken,
   };
 }
 
 export async function GET() {
   try {
-    const { businessId, apiKey } = await getClientCredentials();
+    const { businessId, accessToken } = await getClientCredentials();
 
     const data = await backendRequest(`/api/businesses/${businessId}`, {
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
       cacheMode: 'force-cache',
       revalidate: 30,
       tags: [`business:${businessId}`],

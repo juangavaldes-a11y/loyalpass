@@ -36,7 +36,6 @@ class AuthController {
           accessToken: result.accessToken,
           role: result.user.role,
           businessId: result.user.business_id || '',
-          apiKey: result.user.apiKey || null,
           email: result.user.email,
         },
       });

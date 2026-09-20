@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createClient, getClient, updateClient, updateBilling, updateOnboarding, getQuotaStatus } from '@/features/admin/api/clientsApi';
+import { createClient, getBusinessModules, getClient, updateBusinessModule, updateClient, updateBilling, updateOnboarding, getQuotaStatus } from '@/features/admin/api/clientsApi';
 
 export function useCreateClient() {
   const queryClient = useQueryClient();
@@ -67,5 +67,24 @@ export function useQuotaStatus(businessId) {
     queryKey: ['admin', 'quota-status', businessId || 'all'],
     queryFn: () => getQuotaStatus({ businessId }),
     enabled: Boolean(businessId),
+  });
+}
+
+export function useBusinessModules(businessId) {
+  return useQuery({
+    queryKey: ['admin', 'business-modules', businessId],
+    queryFn: () => getBusinessModules({ businessId }),
+    enabled: Boolean(businessId),
+  });
+}
+
+export function useUpdateBusinessModule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateBusinessModule,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'business-modules', variables.businessId] });
+    },
   });
 }

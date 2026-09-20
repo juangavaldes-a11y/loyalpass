@@ -42,3 +42,18 @@ export async function getQuotaStatus({ businessId }) {
   });
   return response.data;
 }
+
+export async function getBusinessModules({ businessId }) {
+  const response = await portalApi.get('/admin/clients/modules', { params: { businessId } });
+  return response.data;
+}
+
+export async function updateBusinessModule({ businessId, moduleKey, enabled, reason }) {
+  const response = await portalApi.put('/admin/clients/modules', {
+    businessId,
+    moduleKey,
+    enabled,
+    reason,
+  });
+  return response.data;
+}

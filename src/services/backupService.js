@@ -1,72 +1,94 @@
 const fs = require('fs');
 const path = require('path');
-const { Business, Customer, Points, Pass, ApiKey, AuditLog, PortalUser } = require('../models');
+const sequelize = require('../config/db');
+const { Business, BusinessModule, Customer, Points, Pass, Promotion, PromotionRedemption, AuditLog } = require('../models');
 const logger = require('../utils/logger');
 
+function getBackupDirectory(outputPath) {
+  return path.resolve(outputPath || process.env.BACKUP_DIRECTORY || path.join(process.cwd(), 'backups'));
+}
+
+function getBackupPath(backupDirectory, backupId) {
+  if (!backupId || path.basename(backupId) !== backupId || !/^loyalpass-backup-[a-zA-Z0-9-]+\.json$/.test(backupId)) {
+    throw new Error('Invalid backup ID');
+  }
+  return path.join(backupDirectory, backupId);
+}
+
 class BackupService {
-  static async createBackup({ outputPath } = {}) {
-    const backupDir = outputPath || path.join(process.cwd(), 'backups');
-    fs.mkdirSync(backupDir, { recursive: true });
+  static async createBackup({ businessId, outputPath } = {}) {
+    if (!businessId) throw new Error('Business ID is required');
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filePath = path.join(backupDir, `loyalpass-backup-${timestamp}.json`);
+    const backupDirectory = getBackupDirectory(outputPath);
+    fs.mkdirSync(backupDirectory, { recursive: true, mode: 0o700 });
+    const business = await Business.findByPk(businessId, { raw: true });
+    if (!business) throw new Error('Business not found');
 
+    const customers = await Customer.findAll({ where: { business_id: businessId }, raw: true });
+    const customerIds = customers.map((customer) => customer.id);
+    const promotions = await Promotion.findAll({ where: { business_id: businessId }, raw: true });
+    const promotionIds = promotions.map((promotion) => promotion.id);
+    const backupId = `loyalpass-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
     const payload = {
       createdAt: new Date().toISOString(),
-      schemaVersion: 1,
+      schemaVersion: 2,
+      businessId,
       data: {
-        businesses: await Business.findAll({ raw: true }),
-        customers: await Customer.findAll({ raw: true }),
-        points: await Points.findAll({ raw: true }),
-        passes: await Pass.findAll({ raw: true }),
-        apiKeys: await ApiKey.findAll({ raw: true }),
-        auditLogs: await AuditLog.findAll({ raw: true }),
-        portalUsers: await PortalUser.findAll({ raw: true }),
+        business,
+        businessModules: await BusinessModule.findAll({ where: { business_id: businessId }, raw: true }),
+        customers,
+        points: customerIds.length ? await Points.findAll({ where: { customer_id: customerIds }, raw: true }) : [],
+        passes: await Pass.findAll({ where: { business_id: businessId }, raw: true }),
+        promotions,
+        promotionRedemptions: promotionIds.length ? await PromotionRedemption.findAll({ where: { promotion_id: promotionIds }, raw: true }) : [],
+        auditLogs: await AuditLog.findAll({ where: { business_id: businessId }, raw: true }),
       },
     };
 
-    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
-    logger.info('Backup created', { filePath });
-
-    return { filePath, recordCount: Object.values(payload.data).reduce((sum, rows) => sum + rows.length, 0) };
+    fs.writeFileSync(getBackupPath(backupDirectory, backupId), JSON.stringify(payload), { mode: 0o600 });
+    logger.info('Business backup created', { businessId, backupId });
+    return { backupId, recordCount: Object.values(payload.data).reduce((sum, rows) => sum + (Array.isArray(rows) ? rows.length : 1), 0) };
   }
 
-  static async restoreBackup({ inputPath }) {
-    if (!inputPath || !fs.existsSync(inputPath)) {
-      throw new Error('Backup file not found');
+  static async restoreBackup({ businessId, backupId, outputPath } = {}) {
+    if (!businessId) throw new Error('Business ID is required');
+    const filePath = getBackupPath(getBackupDirectory(outputPath), backupId);
+    if (!fs.existsSync(filePath)) throw new Error('Backup file not found');
+
+    const payload = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (payload?.schemaVersion !== 2 || payload?.businessId !== businessId || !payload?.data?.business) {
+      throw new Error('Backup does not match this business or schema version');
     }
 
-    const payload = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
-    if (!payload?.data) {
-      throw new Error('Invalid backup payload');
-    }
-
-    const { data } = payload;
-    const restoreOrder = [
-      ['Business', data.businesses],
-      ['Customer', data.customers],
-      ['Points', data.points],
-      ['Pass', data.passes],
-      ['ApiKey', data.apiKeys],
-      ['AuditLog', data.auditLogs],
-      ['PortalUser', data.portalUsers],
-    ];
-
-    for (const [modelName, rows] of restoreOrder) {
-      if (!Array.isArray(rows)) {
-        continue;
+    await sequelize.transaction(async (transaction) => {
+      await Business.upsert(payload.data.business, { transaction });
+      const restoreOrder = [
+        ['Customer', payload.data.customers],
+        ['Points', payload.data.points],
+        ['Pass', payload.data.passes],
+        ['Promotion', payload.data.promotions],
+        ['PromotionRedemption', payload.data.promotionRedemptions],
+        ['BusinessModule', payload.data.businessModules],
+        ['AuditLog', payload.data.auditLogs],
+      ];
+      for (const [modelName, rows] of restoreOrder) {
+        if (Array.isArray(rows) && rows.length) {
+          await require('../models')[modelName].bulkCreate(rows, { ignoreDuplicates: true, transaction });
+        }
       }
+    });
 
-      const model = require('../models')[modelName];
-      if (!model) {
-        continue;
-      }
-
-      await model.bulkCreate(rows, { ignoreDuplicates: true, updateOnDuplicate: ['id'] });
-    }
-
-    logger.info('Backup restored', { inputPath });
-    return { restored: true, inputPath };
+    await AuditLog.create({
+      business_id: businessId,
+      actor_type: 'system',
+      actor_id: 'backup-service',
+      action: 'business.backup.restore',
+      entity_type: 'business',
+      entity_id: businessId,
+      metadata: { backupId },
+    });
+    logger.info('Business backup restored', { businessId, backupId });
+    return { restored: true, backupId };
   }
 }
 

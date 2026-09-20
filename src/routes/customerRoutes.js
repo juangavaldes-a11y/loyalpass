@@ -1,8 +1,10 @@
 const express = require('express');
 const CustomerController = require('../controllers/customerController');
 const { writeLimiter } = require('../middleware/rateLimitMiddleware');
+const { requireModule } = require('../middleware/moduleEntitlementMiddleware');
 
 const router = express.Router();
+router.use(requireModule('customers'));
 
 // Create customer
 router.post('/', writeLimiter, CustomerController.createCustomer);

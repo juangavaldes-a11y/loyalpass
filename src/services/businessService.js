@@ -41,7 +41,7 @@ class BusinessService {
 
       return {
         business: business.toJSON(),
-        apiKey: apiKey.key,
+        apiKey,
         owner: {
           email: ownerUser.email,
           password: ownerPassword,
@@ -203,7 +203,7 @@ class BusinessService {
     try {
       return await ApiKey.findAll({
         where: { business_id: businessId },
-        attributes: { exclude: ['key'] }, // Don't return the actual key
+        attributes: { exclude: ['key_hash'] },
       });
     } catch (error) {
       logger.error('Error getting API keys:', error);
@@ -216,9 +216,7 @@ class BusinessService {
    */
   static async createApiKey(businessId) {
     try {
-      const apiKey = await ApiKey.create({
-        business_id: businessId,
-      });
+      const apiKey = await ApiKey.issue(businessId);
       logger.info(`API key created for business: ${businessId}`);
       return apiKey.key;
     } catch (error) {

@@ -1,5 +1,6 @@
 import AdminClientsDashboard from '@/features/admin/components/AdminClientsDashboard';
 import AdminAuditDashboard from '@/features/admin/components/AdminAuditDashboard';
+import AdminModulesPanel from '@/features/admin/components/AdminModulesPanel';
 
 export const metadata = {
   title: 'LoyalPass Admin Portal',
@@ -10,6 +11,9 @@ export default function AdminPage() {
   return (
     <div>
       <AdminClientsDashboard />
+      <div style={{ marginTop: '2rem' }}>
+        <AdminModulesPanel />
+      </div>
       <div style={{ marginTop: '2rem' }}>
         <AdminAuditDashboard />
       </div>

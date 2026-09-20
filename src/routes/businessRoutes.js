@@ -22,6 +22,8 @@ router.post('/:id/billing', writeLimiter, BusinessController.updateBilling);
 router.post('/:id/billing/subscriptions', writeLimiter, BusinessController.createSubscription);
 router.post('/:id/billing/payments', writeLimiter, BusinessController.recordPayment);
 router.get('/:id/quota-status', BusinessController.getQuotaStatus);
+router.get('/:id/modules', BusinessController.getModules);
+router.put('/:id/modules/:moduleKey', writeLimiter, BusinessController.updateModule);
 
 // API Key management
 router.get('/:id/api-keys', BusinessController.getApiKeys);

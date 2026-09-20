@@ -9,6 +9,7 @@ import { useCreatePass, usePass, useUpdatePass } from '@/features/client/hooks/u
 import OnboardingChecklist from '@/features/shared/components/OnboardingChecklist';
 import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
 import ClientPromotionsPanel from './ClientPromotionsPanel';
+import { useClientModules } from '@/features/client/hooks/useModules';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -38,9 +39,13 @@ export default function ClientCustomersDashboard() {
 
   const pointsQuery = usePoints(pointsForm.customerId);
   const passQuery = usePass(passForm.customerId);
+  const modulesQuery = useClientModules();
 
   const customers = customersQuery.data?.data || [];
   const businessProfile = businessProfileQuery.data?.data || null;
+  const enabledModules = new Set(
+    (modulesQuery.data?.data || []).filter((module) => module.enabled).map((module) => module.key)
+  );
 
   const onboardingSteps = [
     {
@@ -372,7 +377,7 @@ export default function ClientCustomersDashboard() {
         </div>
       </section>
 
-      <ClientPromotionsPanel />
+      {enabledModules.has('promotions') ? <ClientPromotionsPanel /> : null}
     </div>
   );
 }

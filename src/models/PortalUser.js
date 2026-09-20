@@ -26,10 +26,6 @@ const PortalUser = sequelize.define(
       type: DataTypes.UUID,
       allowNull: true,
     },
-    api_key: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-    },
     active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,

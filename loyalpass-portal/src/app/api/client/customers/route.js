@@ -10,26 +10,26 @@ async function getClientCredentials() {
   const token = cookieStore.get(getSessionCookieName())?.value;
   const session = await verifySessionToken(token);
 
-  if (!session?.businessId || !session?.apiKey) {
+  if (!session?.businessId || !session?.accessToken) {
     throw new Error('Missing authenticated client context');
   }
 
   return {
     businessId: session.businessId,
-    apiKey: session.apiKey,
+    accessToken: session.accessToken,
   };
 }
 
 export async function GET(request) {
   try {
-    const { businessId, apiKey } = await getClientCredentials();
+    const { businessId, accessToken } = await getClientCredentials();
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
 
     const path = customerId ? `/api/customers/${customerId}` : '/api/customers';
 
     const data = await backendRequest(path, {
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
       cacheMode: 'force-cache',
       revalidate: 30,
       tags: [`customers:${businessId}`],
@@ -47,13 +47,13 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const { businessId, apiKey } = await getClientCredentials();
+    const { businessId, accessToken } = await getClientCredentials();
     const payload = await request.json();
 
     const data = await backendRequest('/api/customers', {
       method: 'POST',
       body: payload,
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     revalidateTag(`customers:${businessId}`);
@@ -70,7 +70,7 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const { businessId, apiKey } = await getClientCredentials();
+    const { businessId, accessToken } = await getClientCredentials();
     const payload = await request.json();
     const { customerId, updates } = payload;
 
@@ -87,7 +87,7 @@ export async function PUT(request) {
     const data = await backendRequest(`/api/customers/${customerId}`, {
       method: 'PUT',
       body: updates || {},
-      apiKey,
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     revalidateTag(`customers:${businessId}`);

@@ -3,6 +3,7 @@ const ExportService = require('../services/exportService');
 const SupportService = require('../services/supportService');
 const BackupService = require('../services/backupService');
 const BillingService = require('../services/billingService');
+const ModuleEntitlementService = require('../services/moduleEntitlementService');
 const logger = require('../utils/logger');
 const { assertPlatformAdmin, assertBusinessAccess } = require('../utils/tenantAccess');
 const { sendSuccess, sendError } = require('../utils/httpResponses');
@@ -243,6 +244,38 @@ class BusinessController {
     }
   }
 
+  static async getModules(req, res, next) {
+    try {
+      assertPlatformAdmin(req);
+      const modules = await ModuleEntitlementService.getCapabilities(req.params.id);
+      return sendSuccess(res, 200, { data: modules });
+    } catch (error) {
+      if (error.message === 'Business not found') return sendError(res, 404, error.message);
+      if (error.message.includes('Admin access')) return sendError(res, 403, error.message);
+      return next(error);
+    }
+  }
+
+  static async updateModule(req, res, next) {
+    try {
+      assertPlatformAdmin(req);
+      const module = await ModuleEntitlementService.setModule({
+        businessId: req.params.id,
+        moduleKey: req.params.moduleKey,
+        enabled: req.body.enabled,
+        reason: req.body.reason,
+        changedBy: req.user?.sub || req.user?.email,
+      });
+      return sendSuccess(res, 200, { data: module });
+    } catch (error) {
+      if (error.message === 'Business not found') return sendError(res, 404, error.message);
+      if (error.message.includes('Admin access') || error.message.includes('Disable') || error.message.includes('reason') || error.message.includes('boolean') || error.message.includes('Unknown')) {
+        return sendError(res, 400, error.message);
+      }
+      return next(error);
+    }
+  }
+
   /**
    * GET /api/businesses/:id/api-keys
    */
@@ -330,7 +363,7 @@ class BusinessController {
         return res.status(403).json({ success: false, message: error.message });
       }
 
-      const backup = await BackupService.createBackup();
+      const backup = await BackupService.createBackup({ businessId: id });
       return sendSuccess(res, 200, { data: backup, message: 'Backup created successfully' });
     } catch (error) {
       next(error);
@@ -340,7 +373,7 @@ class BusinessController {
   static async restoreBackup(req, res, next) {
     try {
       const { id } = req.params;
-      const { inputPath } = req.body;
+      const { backupId } = req.body;
 
       try {
         assertBusinessAccess(req, id);
@@ -348,7 +381,7 @@ class BusinessController {
         return res.status(403).json({ success: false, message: error.message });
       }
 
-      const result = await BackupService.restoreBackup({ inputPath });
+      const result = await BackupService.restoreBackup({ businessId: id, backupId });
       return sendSuccess(res, 200, { data: result, message: 'Backup restored successfully' });
     } catch (error) {
       next(error);

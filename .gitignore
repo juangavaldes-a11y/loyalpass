@@ -44,3 +44,7 @@ Thumbs.db
 # Sensitive files
 secrets.json
 credentials.json
+
+# Generated backup payloads may contain tenant data.
+backups/*.json
+tmp-backups/*.json

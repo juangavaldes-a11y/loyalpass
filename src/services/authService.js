@@ -60,8 +60,7 @@ class AuthService {
     return user;
   }
 
-  static async createBusinessOwnerUser(business, plaintextPassword, apiKey = null) {
-    await PortalUser.sync();
+  static async createBusinessOwnerUser(business, plaintextPassword) {
 
     const password_hash = await bcrypt.hash(plaintextPassword, 10);
     const slug = business.name.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/\.+/g, '.').replace(/^\.|\.$/g, '') || 'business';
@@ -72,7 +71,6 @@ class AuthService {
       password_hash,
       role: 'client_owner',
       business_id: business.id,
-      api_key: apiKey,
       active: true,
     });
 

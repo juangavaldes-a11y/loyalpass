@@ -110,13 +110,13 @@ describe('business lifecycle and middleware coverage', () => {
       .set('Authorization', `Bearer ${adminToken}`);
     expect(backupResponse.status).toBe(200);
 
-    const backupFilePath = backupResponse.body.data.filePath;
-    expect(fs.existsSync(backupFilePath)).toBe(true);
+    const backupId = backupResponse.body.data.backupId;
+    expect(backupId).toMatch(/^loyalpass-backup-/);
 
     const restoreResponse = await request(app)
       .post(`/api/businesses/${createdBusinessId}/restore`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ inputPath: backupFilePath });
+      .send({ backupId });
     expect(restoreResponse.status).toBe(200);
 
     const deleteResponse = await request(app)

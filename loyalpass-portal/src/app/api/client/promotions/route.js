@@ -9,25 +9,27 @@ async function getClientCredentials() {
   const cookieStore = await cookies();
   const token = cookieStore.get(getSessionCookieName())?.value;
   const session = await verifySessionToken(token);
-  if (!session?.businessId || !session?.apiKey) throw new Error('Missing authenticated client context');
-  return { businessId: session.businessId, apiKey: session.apiKey };
+  if (!session?.businessId || !session?.accessToken) throw new Error('Missing authenticated client context');
+  return { businessId: session.businessId, accessToken: session.accessToken };
 }
 
 async function handle(request, method) {
   try {
-    const { businessId, apiKey } = await getClientCredentials();
+    const { businessId, accessToken } = await getClientCredentials();
     const payload = method === 'GET' ? undefined : await request.json();
     const promotionId = method === 'PUT' || method === 'POST' ? payload?.promotionId : null;
     const path = method === 'GET' ? '/api/promotions' : promotionId ? `/api/promotions/${promotionId}` : '/api/promotions';
     const body = promotionId ? payload?.updates || payload : payload;
     const data = await backendRequest(path, {
       method,
-      apiKey,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...(payload?.idempotencyKey ? { 'Idempotency-Key': payload.idempotencyKey } : {}),
+      },
       body,
       cacheMode: method === 'GET' ? 'force-cache' : undefined,
       revalidate: 20,
       tags: [`promotions:${businessId}`],
-      headers: payload?.idempotencyKey ? { 'Idempotency-Key': payload.idempotencyKey } : undefined,
     });
     revalidateTag(`promotions:${businessId}`);
     return NextResponse.json(data, { status: method === 'POST' ? 201 : 200 });

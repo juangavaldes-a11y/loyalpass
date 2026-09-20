@@ -5,9 +5,9 @@ const AuditService = require('./auditService');
 const logger = require('../utils/logger');
 
 async function createBusinessOwnerContext(business) {
-  const apiKey = await ApiKey.create({ business_id: business.id });
+  const apiKey = await ApiKey.issue(business.id);
   const ownerPassword = crypto.randomBytes(8).toString('hex');
-  const ownerUser = await AuthService.createBusinessOwnerUser(business, ownerPassword, apiKey.key);
+  const ownerUser = await AuthService.createBusinessOwnerUser(business, ownerPassword);
 
   await AuditService.log({
     businessId: business.id,
@@ -22,7 +22,7 @@ async function createBusinessOwnerContext(business) {
   logger.info(`Business created: ${business.id}`);
 
   return {
-    apiKey,
+    apiKey: apiKey.key,
     ownerPassword,
     ownerUser,
   };
@@ -30,7 +30,7 @@ async function createBusinessOwnerContext(business) {
 
 async function rotateBusinessApiKey(businessId) {
   await ApiKey.update({ active: false }, { where: { business_id: businessId } });
-  const newKey = await ApiKey.create({ business_id: businessId });
+  const newKey = await ApiKey.issue(businessId);
 
   await AuditService.log({
     businessId,

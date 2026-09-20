@@ -52,6 +52,7 @@ const mergedConfig = {
     ...baseAppConfig,
     port: getEnvOrDefault('PORT', getConfigValue('app', 'port', 3000)),
     nodeEnv,
+    corsOrigins: getEnvOrDefault('CORS_ORIGINS', '').split(',').map((origin) => origin.trim()).filter(Boolean),
   },
   apple: {
     ...baseAppleConfig,
@@ -84,5 +85,25 @@ const mergedConfig = {
     webhookSecret: getSecretValue('WEBHOOK_SECRET', getConfigValue('secrets', 'webhookSecret', '')),
   },
 };
+
+function validateProductionConfiguration() {
+  if (nodeEnv !== 'production') {
+    return;
+  }
+
+  const required = [
+    ['AUTH_SESSION_SECRET', mergedConfig.secrets.authSessionSecret],
+    ['PLATFORM_ADMIN_EMAIL', mergedConfig.secrets.platformAdminEmail],
+    ['PLATFORM_ADMIN_PASSWORD', mergedConfig.secrets.platformAdminPassword],
+    ['DB_PASSWORD', mergedConfig.db.password],
+  ];
+  const missing = required.filter(([, value]) => !value || value === 'change-me-in-production').map(([key]) => key);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required production configuration: ${missing.join(', ')}`);
+  }
+}
+
+mergedConfig.validateProductionConfiguration = validateProductionConfiguration;
 
 module.exports = mergedConfig;

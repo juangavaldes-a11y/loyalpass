@@ -1,22 +1,14 @@
 const app = require('./app');
 const config = require('./config/env');
 const logger = require('./utils/logger');
-const pool = require('./config/db');
+const sequelize = require('./config/db');
 const AuthService = require('./services/authService');
 
 const PORT = config.app.port;
 
-// Test database connection
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    logger.error('Database connection failed:', err);
-    process.exit(1);
-  } else {
-    logger.info('Database connected successfully');
-  }
-});
-
 const startServer = async () => {
+  config.validateProductionConfiguration();
+  await sequelize.authenticate();
   await AuthService.seedDefaultPlatformAdmin();
 
   const server = app.listen(PORT, () => {
@@ -29,26 +21,27 @@ const startServer = async () => {
 
 let server;
 
+async function shutdown(signal) {
+  logger.info(`${signal} received, shutting down gracefully`);
+  if (server) {
+    await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+  }
+  await sequelize.close();
+  logger.info('Server and database connection closed');
+}
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  logger.info('SIGTERM received, shutting down gracefully');
-  server?.close(() => {
-    logger.info('Server closed');
-    pool.end(() => {
-      logger.info('Database pool closed');
-      process.exit(0);
-    });
+  shutdown('SIGTERM').then(() => process.exit(0)).catch((error) => {
+    logger.error('Graceful shutdown failed:', error);
+    process.exit(1);
   });
 });
 
 process.on('SIGINT', () => {
-  logger.info('SIGINT received, shutting down gracefully');
-  server?.close(() => {
-    logger.info('Server closed');
-    pool.end(() => {
-      logger.info('Database pool closed');
-      process.exit(0);
-    });
+  shutdown('SIGINT').then(() => process.exit(0)).catch((error) => {
+    logger.error('Graceful shutdown failed:', error);
+    process.exit(1);
   });
 });
 
