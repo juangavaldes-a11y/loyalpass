@@ -10,6 +10,9 @@ import OnboardingChecklist from '@/features/shared/components/OnboardingChecklis
 import MilestoneTimeline from '@/features/shared/components/MilestoneTimeline';
 import ClientPromotionsPanel from './ClientPromotionsPanel';
 import { useClientModules } from '@/features/client/hooks/useModules';
+import { getEnabledClientModules } from '@/modules/registry';
+import PortalShell from '@/features/shared/components/PortalShell';
+import ModuleSection from '@/features/shared/components/ModuleSection';
 import styles from '@/app/portal.module.css';
 
 function mutationStatus(mutation) {
@@ -46,6 +49,8 @@ export default function ClientCustomersDashboard() {
   const enabledModules = new Set(
     (modulesQuery.data?.data || []).filter((module) => module.enabled).map((module) => module.key)
   );
+  const enabledModuleDefinitions = getEnabledClientModules(modulesQuery.data?.data || []);
+  const moduleByKey = new Map(enabledModuleDefinitions.map((module) => [module.key, module]));
 
   const onboardingSteps = [
     {
@@ -166,15 +171,13 @@ export default function ClientCustomersDashboard() {
   }
 
   return (
-    <div className={styles.pageShell}>
-      <header className={styles.hero}>
-        <p className={styles.kicker}>Client Portal</p>
-        <h1>Customer Management</h1>
-        <p>Add and update loyalty members with a cached query layer for responsive workflows.</p>
-        <button type="button" className={styles.ghostButton} onClick={handleLogout}>
-          Logout
-        </button>
-      </header>
+    <PortalShell
+      eyebrow="Client Portal"
+      title="Customer Management"
+      description="Run the loyalty program through the modules enabled for your organization."
+      modules={enabledModuleDefinitions}
+      onLogout={handleLogout}
+    >
 
       <section className={styles.summaryGrid}>
         <article className={styles.statCard}>
@@ -197,6 +200,7 @@ export default function ClientCustomersDashboard() {
         </article>
       </section>
 
+      {enabledModules.has('customers') ? <section className={styles.moduleSection}>
       <section className={styles.grid}>
         <article className={styles.card}>
           <div className={styles.sectionHeadline}>
@@ -277,8 +281,10 @@ export default function ClientCustomersDashboard() {
           {mutationStatus(updateMutation) ? <p className={styles.status}>{mutationStatus(updateMutation)}</p> : null}
         </article>
       </section>
+      </section> : null}
 
       <section className={styles.grid}>
+        {enabledModules.has('points') ? <ModuleSection module={moduleByKey.get('points')}>
         <article className={styles.card}>
           <h2>Points</h2>
           <form className={styles.form} onSubmit={handleAddPoints}>
@@ -307,7 +313,9 @@ export default function ClientCustomersDashboard() {
             <p className={styles.status}>Balance: {pointsQuery.data.data.balance}</p>
           ) : null}
         </article>
+        </ModuleSection> : null}
 
+        {enabledModules.has('passes') ? <ModuleSection module={moduleByKey.get('passes')}>
         <article className={styles.card}>
           <h2>Passes</h2>
           <form className={styles.form} onSubmit={handleCreatePass}>
@@ -342,8 +350,10 @@ export default function ClientCustomersDashboard() {
             </div>
           ) : null}
         </article>
+        </ModuleSection> : null}
       </section>
 
+      {enabledModules.has('customers') ? <ModuleSection module={moduleByKey.get('customers')}>
       <section className={styles.card}>
         <div className={styles.sectionHeader}>
           <h2>Customer List</h2>
@@ -376,8 +386,9 @@ export default function ClientCustomersDashboard() {
           </table>
         </div>
       </section>
+      </ModuleSection> : null}
 
-      {enabledModules.has('promotions') ? <ClientPromotionsPanel /> : null}
-    </div>
+      {enabledModules.has('promotions') ? <ModuleSection module={moduleByKey.get('promotions')}><ClientPromotionsPanel /></ModuleSection> : null}
+    </PortalShell>
   );
 }
