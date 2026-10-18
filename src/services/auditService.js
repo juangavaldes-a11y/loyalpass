@@ -45,6 +45,9 @@ class AuditService {
       }
     } else if (user.businessId) {
       where.business_id = user.businessId;
+    } else {
+      // Fail closed: a session with no tenant must never fall through to an unfiltered query.
+      throw new Error('Forbidden: Access denied');
     }
 
     if (filters.from || filters.to) {

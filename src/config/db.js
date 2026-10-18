@@ -8,7 +8,7 @@ if (config.db.dialect === 'sqlite') {
   sequelize = new Sequelize({
     dialect: 'sqlite',
     storage: config.db.storage || './dev.sqlite3',
-    logging: config.db.logging ? console.log : false,
+    logging: config.db.logging ? (sql) => logger.debug('db.query', { sql }) : false,
   });
 } else if (config.db.dialect === 'postgres') {
   sequelize = new Sequelize(
@@ -19,7 +19,7 @@ if (config.db.dialect === 'sqlite') {
       host: config.db.host,
       port: config.db.port,
       dialect: 'postgres',
-      logging: config.db.logging ? console.log : false,
+      logging: config.db.logging ? (sql) => logger.debug('db.query', { sql }) : false,
       pool: config.db.pool || {
         max: 5,
         min: 0,

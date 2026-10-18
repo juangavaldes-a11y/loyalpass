@@ -14,15 +14,17 @@ class AuditController {
       const page = parsePositiveInt(req.query.page, 1);
       const pageSize = Math.min(parsePositiveInt(req.query.pageSize, 25), 100);
 
+      // Query params can arrive as arrays/objects (?action[x]=1); only plain strings are valid filters.
+      const asString = (value) => (typeof value === 'string' && value !== '' ? value : undefined);
       const filters = {
-        businessId: req.query.businessId,
-        actorType: req.query.actorType,
-        actorId: req.query.actorId,
-        action: req.query.action,
-        entityType: req.query.entityType,
-        entityId: req.query.entityId,
-        from: req.query.from,
-        to: req.query.to,
+        businessId: asString(req.query.businessId),
+        actorType: asString(req.query.actorType),
+        actorId: asString(req.query.actorId),
+        action: asString(req.query.action),
+        entityType: asString(req.query.entityType),
+        entityId: asString(req.query.entityId),
+        from: asString(req.query.from),
+        to: asString(req.query.to),
       };
 
       const result = await AuditService.listAuditLogs({
@@ -43,6 +45,12 @@ class AuditController {
     } catch (error) {
       if (error.message === 'Invalid date range') {
         return res.status(400).json({
+          success: false,
+          message: error.message,
+        });
+      }
+      if (error.message?.startsWith('Forbidden')) {
+        return res.status(403).json({
           success: false,
           message: error.message,
         });

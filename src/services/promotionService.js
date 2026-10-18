@@ -1,4 +1,3 @@
-const { Op } = require('sequelize');
 const sequelize = require('../config/db');
 const { Promotion, PromotionRedemption, Customer } = require('../models');
 const AuditService = require('./auditService');

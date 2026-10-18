@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const sequelize = require('./config/db');
 const config = require('./config/env');
+const observability = require('./observability');
 const apiKeyAuth = require('./middleware/authMiddleware');
 const { generalApiLimiter, authLimiter } = require('./middleware/rateLimitMiddleware');
 const authRoutes = require('./routes/authRoutes');
@@ -19,18 +20,25 @@ const moduleRoutes = require('./routes/moduleRoutes');
 
 const app = express();
 
+// Behind a reverse proxy, req.ip (rate limiting, logs) is only correct if the proxy is trusted.
+// Left off by default: trusting an unknown X-Forwarded-For lets clients spoof their IP.
+app.set('trust proxy', config.app.trustProxy);
+
 // Middleware
+app.use(observability.requestLogger()); // first, so every log line carries the request ID
 app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
     if (!origin || config.app.nodeEnv !== 'production' || config.app.corsOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Origin not allowed by CORS policy'));
+    const error = new Error('Origin not allowed by CORS policy');
+    error.statusCode = 403;
+    return callback(error);
   },
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: config.app.bodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: config.app.bodyLimit }));
 
 // Health check (no auth required)
 app.get('/health', async (req, res) => {

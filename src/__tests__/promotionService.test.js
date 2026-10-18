@@ -1,5 +1,5 @@
 const sequelize = require('../config/db');
-const { Business, Customer, Promotion, PromotionRedemption } = require('../models');
+const { Business, Customer, PromotionRedemption } = require('../models');
 const PromotionService = require('../services/promotionService');
 
 describe('promotion service', () => {

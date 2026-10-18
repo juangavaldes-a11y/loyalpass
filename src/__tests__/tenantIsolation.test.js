@@ -7,7 +7,7 @@ process.env.PLATFORM_ADMIN_PASSWORD = 'admin123';
 
 const app = require('../app');
 const sequelize = require('../config/db');
-const { Business, Customer, ApiKey, PortalUser } = require('../models');
+const { Business, Customer, ApiKey } = require('../models');
 const AuthService = require('../services/authService');
 
 async function loginAdmin() {

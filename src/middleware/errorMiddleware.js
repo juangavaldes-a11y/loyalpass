@@ -1,51 +1,40 @@
 const logger = require('../utils/logger');
+const observability = require('../observability');
 
 const buildRequestContext = (req) => ({
   method: req.method,
   path: req.path,
-  requestId: req.headers['x-request-id'] || req.id,
+  requestId: req.id || req.headers['x-request-id'],
   businessId: req.businessId || req.user?.businessId || null,
   userId: req.user?.sub || null,
   isPlatformAdmin: Boolean(req.isPlatformAdmin),
 });
+
+const resolveStatusCode = (err) => {
+  if (err.name === 'ValidationError') return 400;
+  if (err.name === 'NotFoundError') return 404;
+  if (err.name === 'UnauthorizedError') return 401;
+  return err.statusCode || 500;
+};
 
 /**
  * Error handling middleware
  */
 const errorHandler = (err, req, res, next) => {
   const requestContext = buildRequestContext(req);
-  logger.error('Unhandled application error', {
-    message: err.message,
-    name: err.name,
-    stack: err.stack,
-    ...requestContext,
-  });
+  const statusCode = resolveStatusCode(err);
 
-  // Default error
-  let statusCode = err.statusCode || 500;
-  let message = err.message || 'Internal server error';
-
-  // Validation errors
-  if (err.name === 'ValidationError') {
-    statusCode = 400;
-    message = err.message;
-  }
-
-  // Not found errors
-  if (err.name === 'NotFoundError') {
-    statusCode = 404;
-    message = err.message;
-  }
-
-  // Unauthorized errors
-  if (err.name === 'UnauthorizedError') {
-    statusCode = 401;
-    message = err.message;
+  // Client errors are expected traffic; only server faults are errors worth paging on.
+  if (statusCode >= 500) {
+    logger.error('Unhandled application error', err, requestContext);
+    observability.captureException(err, requestContext);
+  } else {
+    logger.warn('Request rejected', { ...requestContext, statusCode, message: err.message });
   }
 
   res.status(statusCode).json({
     success: false,
-    message,
+    message: err.message || 'Internal server error',
     requestId: requestContext.requestId,
     ...(process.env.NODE_ENV === 'development' && { error: err.stack }),
   });

@@ -1,18 +1,9 @@
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { PortalUser, Business } = require('../models');
+const { PortalUser } = require('../models');
 const logger = require('../utils/logger');
 
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
-
-function getSecret() {
-  const secret = process.env.AUTH_SESSION_SECRET;
-  if (!secret) {
-    throw new Error('AUTH_SESSION_SECRET is required');
-  }
-  return new TextEncoder().encode(secret);
-}
 
 async function signAccessToken(payload) {
   return jwt.sign(payload, process.env.AUTH_SESSION_SECRET, {
