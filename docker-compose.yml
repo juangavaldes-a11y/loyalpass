@@ -1,8 +1,41 @@
-version: '3.8'
+x-db-env: &db-env
+  DB_DIALECT: postgres
+  DB_HOST: db
+  DB_PORT: 5432
+  DB_USERNAME: ${DB_USERNAME:-loyalpass}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+  DB_NAME: ${DB_NAME:-loyalpass_db}
 
 services:
+  # One-shot schema migration. The app only starts after it succeeds, and running it as its
+  # own job (not inside every app container) keeps replicas from racing each other.
+  migrate:
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-}
+    image: loyalpass-app:local
+    container_name: loyalpass-migrate
+    profiles:
+      - backend
+      - full
+    command: ["npm", "run", "db:migrate"]
+    environment:
+      NODE_ENV: production
+      <<: *db-env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - loyalpass-network
+    restart: "no"
+
   app:
-    build: .
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-}
+    image: loyalpass-app:local
     container_name: loyalpass-app
     profiles:
       - backend
@@ -10,18 +43,17 @@ services:
     ports:
       - "3000:3000"
     environment:
+      <<: *db-env
       NODE_ENV: production
       AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:?AUTH_SESSION_SECRET is required}
       PLATFORM_ADMIN_EMAIL: ${PLATFORM_ADMIN_EMAIL:?PLATFORM_ADMIN_EMAIL is required}
       PLATFORM_ADMIN_PASSWORD: ${PLATFORM_ADMIN_PASSWORD:?PLATFORM_ADMIN_PASSWORD is required}
-      DB_DIALECT: postgres
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USERNAME: ${DB_USERNAME:-loyalpass}
-      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
-      DB_NAME: ${DB_NAME:-loyalpass_db}
       PORT: 3000
       LOG_LEVEL: info
+      TRUST_PROXY: ${TRUST_PROXY:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      APP_VERSION: ${APP_VERSION:-}
+      SHUTDOWN_TIMEOUT_MS: 10000
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3001}
       RATE_LIMIT_GENERAL_WINDOW_MINUTES: 15
       RATE_LIMIT_GENERAL_MAX: 500
@@ -39,10 +71,11 @@ services:
       BAC_API_KEY: ${BAC_API_KEY:-}
       BAC_CREATE_PAYMENT_PATH: ${BAC_CREATE_PAYMENT_PATH:-/payments}
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     volumes:
-      - ./logs:/app/logs
+      - backups_data:/data/backups
+    stop_grace_period: 15s
     networks:
       - loyalpass-network
     restart: unless-stopped
@@ -82,7 +115,7 @@ services:
     networks:
       - loyalpass-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U loyalpass"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -90,6 +123,7 @@ services:
 
 volumes:
   postgres_data:
+  backups_data:
 
 networks:
   loyalpass-network:
