@@ -1,12 +1,12 @@
 # syntax=docker/dockerfile:1
 
 # Production dependencies only (sqlite3 and test tooling are devDependencies)
-FROM node:20-alpine AS deps
+FROM node:25-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-FROM node:20-alpine AS runtime
+FROM node:25-alpine AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
