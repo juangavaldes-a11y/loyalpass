@@ -25,9 +25,9 @@ Estado evaluado el 2026-10-24 sobre la rama `chore/production-hardening`.
   - Verificar que `googlePassService.js` firme el JWT con la cuenta de servicio (warnings de `key`, `algo`, `response` sin usar sugieren código incompleto).
 - [ ] **3. Pagos BAC sin verificar.**
   Confirmar paths y auth con la cuenta BAC regional; implementar confirmación por webhook y conciliación para que el estado de la suscripción dependa de un pago real.
-- [ ] **4. Backups con datos en git.**
+- [x] **4. Backups con datos en git.**
   `backups/*.json` (5 archivos) está versionado. Sacarlos del índice (`git rm --cached`), agregar `backups/` a `.gitignore`. Si algún dato fuera real, limpiar el historial.
-- [ ] **5. Vulnerabilidades de dependencias.**
+- [x] **5. Vulnerabilidades de dependencias.**
   - Backend: 3 (1 alta, 2 moderadas) por `uuid` vía `sequelize`; `npm run audit:prod` falla hoy, y con él el job de CI.
   - Portal: `follow-redirects` (alta) — `npm audit fix`.
 

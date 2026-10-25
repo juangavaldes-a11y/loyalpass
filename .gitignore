@@ -46,3 +46,6 @@ credentials.json
 # Generated backup payloads may contain tenant data.
 backups/*.json
 tmp-backups/*.json
+
+# Generated backups (may contain tenant data)
+backups/
