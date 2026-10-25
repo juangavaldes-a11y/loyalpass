@@ -1,12 +1,9 @@
-const fs = require('fs');
-const path = require('path');
 const request = require('supertest');
 const sequelize = require('../config/db');
 const app = require('../app');
 const AuthService = require('../services/authService');
 const BusinessService = require('../services/businessService');
 const SupportService = require('../services/supportService');
-const BackupService = require('../services/backupService');
 const { errorHandler, notFoundHandler } = require('../middleware/errorMiddleware');
 
 process.env.NODE_ENV = 'test';

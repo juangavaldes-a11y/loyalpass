@@ -1,7 +1,6 @@
 const request = require('supertest');
 const { createCustomerWithPoints } = require('../services/customerLifecycleService');
 const CustomerService = require('../services/customerService');
-const PassService = require('../services/passService');
 const AuthService = require('../services/authService');
 const sequelize = require('../config/db');
 const app = require('../app');

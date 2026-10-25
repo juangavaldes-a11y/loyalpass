@@ -107,9 +107,9 @@ class BusinessController {
    * PUT /api/businesses/:id
    */
   static async updateBusiness(req, res, next) {
-    try {
-      const { id } = req.params;
+    const { id } = req.params;
 
+    try {
       try {
         assertBusinessAccess(req, id);
       } catch (error) {

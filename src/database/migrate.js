@@ -99,7 +99,7 @@ if (require.main === module) {
       pool.end();
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(() => {
       pool.end();
       process.exit(1);
     });

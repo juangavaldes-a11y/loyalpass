@@ -5,7 +5,7 @@ points, and generate Apple/Google Wallet passes. Includes a Next.js admin
 portal, billing/subscription tracking, and audit/export/backup workflows.
 
 ## Tech Stack
-**Backend:** Node.js 18+, Express 4, Sequelize (PostgreSQL prod / SQLite dev),
+**Backend:** Node.js 20+, Express 4, Sequelize (PostgreSQL prod / SQLite dev),
 JWT + bcryptjs, express-validator, helmet, CORS, express-rate-limit,
 nodemailer, `pkpass` (Apple Wallet), `google-auth-library` (Google Wallet),
 `qrcode`, Jest.
@@ -22,7 +22,10 @@ src/                       Backend
 ├── middleware/              authMiddleware, adminAuthMiddleware,
                              moduleEntitlementMiddleware, errorMiddleware
                              (rate limiters: general/auth/write)
-└── utils/                   logger.js, httpResponses.js, qrCode.js,
+├── lib/observability/      Portable logging/request-tracing/Sentry module (own README + tests;
+                             must not import anything from the rest of src/)
+├── observability.js        loyalpass wiring for the module (service name, tenant context)
+└── utils/                   logger.js (shim over lib/observability), httpResponses.js, qrCode.js,
                              passTemplates.js, fieldMapping.js, planLimits.js,
                              tenantAccess.js (assertPlatformAdmin/assertBusinessAccess)
 
@@ -40,6 +43,9 @@ cp .env.example .env
 npm run dev                 # nodemon, port 3000 (SQLite by default)
 npm test                    # Jest
 npm run db:migrate / db:seed
+npm run lint                # ESLint (CI caps warnings via lint:ci); npm run audit:prod = dependency audit
+# Production image: non-root, tini, no sqlite3. Migrations run as a separate one-shot `migrate`
+# service (compose) / `npm run db:migrate` release step — NOT on app start. Backups persist in /data/backups.
 docker compose --profile full up --build -d      # backend + portal + postgres
 docker compose --profile backend up --build -d
 docker compose --profile portal up --build -d
@@ -60,6 +66,9 @@ payments, quota-status, modules, api-keys, export, backup/restore, support);
   checks when adding tenant-scoped routes.
 - Use `sendSuccess()` / `sendError()` from `httpResponses.js` for all
   responses — keep response shape consistent.
+- Log with `logger.info('noun.verb', { fields })` and pass `Error` objects as the
+  second argument to `logger.error` — never interpolate data into the message or
+  `console.log`. Redaction is automatic by key name.
 - Wallet integrations (Apple/Google) must fail gracefully if credentials are
   missing (log + skip), never crash the request.
 - New paid features should be modeled as a `BusinessModule` entitlement +

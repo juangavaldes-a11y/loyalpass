@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const sequelize = require('../config/db');
 const initializeDatabase = require('../database/migrate');
 const { generateQRCode, generateQRCodeBuffer } = require('../utils/qrCode');
@@ -10,7 +8,7 @@ const PointsService = require('../services/pointsService');
 const ApplePassService = require('../services/applePassService');
 const GooglePassService = require('../services/googlePassService');
 const WebhookService = require('../services/webhookService');
-const { Business, Customer, Points, Pass } = require('../models');
+const { Business, Customer, Points } = require('../models');
 
 jest.mock('qrcode', () => ({
   toDataURL: jest.fn(),

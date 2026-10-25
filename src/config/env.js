@@ -27,6 +27,14 @@ function getConfigValue(section, key, fallback) {
   return fallback;
 }
 
+function parseTrustProxy(value) {
+  const normalized = String(value).trim();
+  if (normalized === '' || normalized.toLowerCase() === 'false') return false;
+  if (normalized.toLowerCase() === 'true') return true;
+  if (/^\d+$/.test(normalized)) return Number(normalized);
+  return normalized;
+}
+
 // Merge environment variables with config file settings
 const nodeEnv = process.env.NODE_ENV || 'development';
 const baseDbConfig = config.has('db') ? config.get('db') : {};
@@ -53,6 +61,10 @@ const mergedConfig = {
     port: getEnvOrDefault('PORT', getConfigValue('app', 'port', 3000)),
     nodeEnv,
     corsOrigins: getEnvOrDefault('CORS_ORIGINS', '').split(',').map((origin) => origin.trim()).filter(Boolean),
+    // Express "trust proxy": number of proxy hops, 'loopback', a CIDR list, or false (default, safe).
+    trustProxy: parseTrustProxy(getEnvOrDefault('TRUST_PROXY', '')),
+    bodyLimit: getEnvOrDefault('BODY_LIMIT', '100kb'),
+    shutdownTimeoutMs: Number(getEnvOrDefault('SHUTDOWN_TIMEOUT_MS', 10000)),
   },
   apple: {
     ...baseAppleConfig,
@@ -86,21 +98,44 @@ const mergedConfig = {
   },
 };
 
+const WEAK_VALUES = new Set([
+  'admin', 'admin123', 'password', 'postgres', 'changeme', 'change-me', 'change-me-in-production',
+  'your_secure_password', 'secret', 'test',
+]);
+const DEFAULT_ADMIN_EMAIL = 'admin@loyalpass.local';
+const MIN_SESSION_SECRET_LENGTH = 32;
+const MIN_ADMIN_PASSWORD_LENGTH = 12;
+
+function isWeak(value) {
+  return !value || WEAK_VALUES.has(String(value).trim().toLowerCase());
+}
+
 function validateProductionConfiguration() {
   if (nodeEnv !== 'production') {
     return;
   }
 
-  const required = [
-    ['AUTH_SESSION_SECRET', mergedConfig.secrets.authSessionSecret],
-    ['PLATFORM_ADMIN_EMAIL', mergedConfig.secrets.platformAdminEmail],
-    ['PLATFORM_ADMIN_PASSWORD', mergedConfig.secrets.platformAdminPassword],
-    ['DB_PASSWORD', mergedConfig.db.password],
-  ];
-  const missing = required.filter(([, value]) => !value || value === 'change-me-in-production').map(([key]) => key);
+  const { authSessionSecret, platformAdminEmail, platformAdminPassword } = mergedConfig.secrets;
+  const problems = [];
 
-  if (missing.length > 0) {
-    throw new Error(`Missing required production configuration: ${missing.join(', ')}`);
+  if (isWeak(authSessionSecret) || authSessionSecret.length < MIN_SESSION_SECRET_LENGTH) {
+    problems.push(`AUTH_SESSION_SECRET must be set to a random value of at least ${MIN_SESSION_SECRET_LENGTH} characters`);
+  }
+  if (!platformAdminEmail || platformAdminEmail === DEFAULT_ADMIN_EMAIL) {
+    problems.push('PLATFORM_ADMIN_EMAIL must be set to a real address (not the seeded default)');
+  }
+  if (isWeak(platformAdminPassword) || platformAdminPassword.length < MIN_ADMIN_PASSWORD_LENGTH) {
+    problems.push(`PLATFORM_ADMIN_PASSWORD must not be a default and must be at least ${MIN_ADMIN_PASSWORD_LENGTH} characters`);
+  }
+  if (mergedConfig.db.dialect === 'postgres' && isWeak(mergedConfig.db.password)) {
+    problems.push('DB_PASSWORD must be set and must not be a default value');
+  }
+  if (mergedConfig.app.corsOrigins.includes('*')) {
+    problems.push('CORS_ORIGINS must list explicit origins, not "*"');
+  }
+
+  if (problems.length > 0) {
+    throw new Error(`Invalid production configuration:\n- ${problems.join('\n- ')}`);
   }
 }
 
